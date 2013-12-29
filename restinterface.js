@@ -5,26 +5,36 @@
 	var create = function(state, config) {
 
 		var server = restify.createServer();
+		server.use(restify.queryParser());
 		
-		server.get('/fileevent/', function(req,res,next){
-			res.send(JSON.stringify( state.getQueue() ) );
+		server.get('/notification/', function(req,res,next) {
+			if(req.query.target){
+				res.send(JSON.stringify( state.getNotifications(req.query.target) ) );
+			}
+			else {
+				res.send(403);
+			}
 		});
 		
-		server.get('/fileevent/:id', function(req,res,next){
-			res.send(JSON.stringify( state.getQueueItem(req.params.id))); 
+		server.get('/notification/:id', function(req,res,next){
+			res.send(JSON.stringify( state.getNotification(req.params.id))); 
 		});
 		
 		server.get('/file/:id', function(req,res,next){
-			var file = state.getQueueItem(req.params.id);
+			var file = state.getNotification(req.params.id);
 			fs.createReadStream(file.filename).pipe(res);
 		});
 
-		server.del('/fileevent/:id', function(req,res,next){
-			var queueItem = state.getQueueItem(req.params.id);
-			state.deleteQueueItem(req.params.id);
-			fs.unlink(queueItem.filename, function(){
+		server.del('/notification/:id', function(req,res,next){
+			var queueItem = state.getNotification(req.params.id);
+			if(state.deleteNotification(req.params.id)) {
+				fs.unlink(queueItem.filename, function(){
+					res.send("ok");
+				});
+			}
+			else {
 				res.send("ok");
-			});
+			}
 		});
 
 		server.listen(config.port, function() {

@@ -2,39 +2,73 @@
 
 	var create = function() {
 		var fileQueue = [];
-		var counter = 0;
+		var notifications = [];
+		var files = [];
+		var fileCounter = 0;
+		var notificationCounter = 0;
+
 		var moduleObject = {
 
-			getQueue: function() {
-				return fileQueue;
+			getNotifications: function(target) {
+				var results = [];
+				for(var i = 0; i < notifications.length; i++) {
+					if(notifications[i].target == target) {
+						results.push(notifications[i]);
+					}
+				}
+				return results;
 			},
 
-			getQueueItem: function( id ) {
-				console.log(id);
-				return fileQueue[ id ];
+			getNotification: function(id) {
+				return notifications[this.getNotificationIndex(id)];
 			},
 
-			deleteQueueItem: function( id ) {
+			deleteNotification: function( id ) {
 				console.log("Deleting item: " + id );
-				fileQueue.splice(this.getQueueItemIndex( id ), 1);
+				var notification = this.getNotification(id);
+				notifications.splice(this.getNotificationIndex( id ), 1);
+				var doDelete = true;
+				for(var i = 0; i < notifications.length; i++ ) {
+					if(notifications[i].fileId == notification.fileId)
+						doDelete = false;
+				}
+				if(doDelete) {
+					files.splice(this.getFileIndex( notification.fileId ), 1);
+				}
+				return doDelete;
 			},
 
-			getQueueItemIndex: function(id) {
+			getFileIndex: function(id) {
 				var index = -1;
-				for (var i = 0; i < fileQueue.length; i++) {
-					if ( fileQueue[i].id == id) {
+				for (var i = 0; i < files.length; i++) {
+					if ( files[i].id == id) {
 						index = i;
 					}
 				}
 				return index;
 			},
 
-			getQueueItem: function(id) {
-				return fileQueue[this.getQueueItemIndex(id)];
+			getNotificationIndex: function(id) {
+				var index = -1;
+				for (var i = 0; i < notifications.length; i++) {
+					if ( notifications[i].id == id) {
+						index = i;
+					}
+				}
+				return index;
 			},
 
-			addFileToQueue: function(path) {
-				fileQueue.push( { filename : path, id : counter++ });
+
+			addFile: function(path, targets) {
+				var file = { filename : path, id : fileCounter++};
+
+				files.push( file );
+
+				targets.forEach(function(target){
+					var notification = { filename : path, id : notificationCounter++, target : target, fileId: file.id };
+					notifications.push(notification);
+
+				});
 				console.log("Added: " + path);
 			}
 			
