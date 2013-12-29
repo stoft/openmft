@@ -1,17 +1,20 @@
+//---------------------------------------------------------------------------
+// File Interface
+// Provides the interface between the agent process and the hosts file system
+//---------------------------------------------------------------------------
 (function() {
+	//-------------
+	// Dependencies
+	//-------------
 	var chokidar = require('chokidar');
-	/*
-	var counter = 0;
 
-	function getFile(req, res, next) {
-		var file = getNotification(req.params.id);
-		fs.createReadStream(file.filename).pipe(res);
-
-		//res.send(JSON.stringify(file));
-	}
-	*/
-	
+	//------------
+	// Constructor
+	//------------	
 	var create = function(state, config) {
+		//-----------------------------------------------
+		// Initialize and start the file system interface
+		//-----------------------------------------------
 		config.triggers.forEach(function(trigger){
 			console.log("Monitoring: " + trigger.dir);
 			var watcher = chokidar.watch(trigger.dir, {ignored: /[\/\\]\./});
@@ -20,8 +23,16 @@
 					state.addFile(path, trigger.targets);
 				});
 		});
+
+		//------------------------------------
+		// Return the newly created "instance"
+		//------------------------------------
+		return {};
 	};
 
+	//---------------
+	// Module exports
+	//---------------
     module.exports.create = function(state, config) {
         return create(state, config);
     }

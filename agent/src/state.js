@@ -1,14 +1,31 @@
+//---------------------------------------------------------------------------
+// Provides state for the running agent process
+// Only used internally in the agent instance
+//---------------------------------------------------------------------------
 (function() {
+	//-------------
+	// Dependencies
+	//-------------
 
+	//------------
+	// Constructor
+	//------------	
 	var create = function() {
-		var fileQueue = [];
+		//-----------------------
+		// Hidden state variables
+		//-----------------------
 		var notifications = [];
 		var files = [];
 		var fileCounter = 0;
 		var notificationCounter = 0;
 
-		var moduleObject = {
-
+		//------------------------------------
+		// Return the newly created "instance"
+		//------------------------------------
+		return {
+			//--------------
+			// Notifications
+			//--------------
 			getNotifications: function(target) {
 				var results = [];
 				for(var i = 0; i < notifications.length; i++) {
@@ -38,16 +55,6 @@
 				return doDelete;
 			},
 
-			getFileIndex: function(id) {
-				var index = -1;
-				for (var i = 0; i < files.length; i++) {
-					if ( files[i].id == id) {
-						index = i;
-					}
-				}
-				return index;
-			},
-
 			getNotificationIndex: function(id) {
 				var index = -1;
 				for (var i = 0; i < notifications.length; i++) {
@@ -58,6 +65,18 @@
 				return index;
 			},
 
+			//-----------------------------
+			// Files (metadata about files)
+			//-----------------------------
+			getFileIndex: function(id) {
+				var index = -1;
+				for (var i = 0; i < files.length; i++) {
+					if ( files[i].id == id) {
+						index = i;
+					}
+				}
+				return index;
+			},
 
 			addFile: function(path, targets) {
 				var file = { filename : path, id : fileCounter++};
@@ -73,10 +92,11 @@
 			}
 			
 		};
-
-		return moduleObject;
 	}
 
+	//---------------
+	// Module exports
+	//---------------
     module.exports.create = function() {
         return create();
     }
