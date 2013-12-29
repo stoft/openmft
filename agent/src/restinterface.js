@@ -25,7 +25,7 @@
 		//------------------------
 		server.get('/notification/', function(req,res,next) {
 			if(req.query.target){
-				res.send(JSON.stringify( state.getNotifications(req.query.target) ) );
+				res.send(state.getNotifications(req.query.target));
 			}
 			else {
 				res.send(403);
@@ -33,7 +33,7 @@
 		});
 		
 		server.get('/notification/:id', function(req,res,next){
-			res.send(JSON.stringify( state.getNotification(req.params.id))); 
+			res.send(state.getNotification(req.params.id));
 		});
 		
 		server.get('/file/:id', function(req,res,next){
@@ -55,6 +55,40 @@
 		//------------------------
 		// Administrator Interface
 		//------------------------
+
+		// Retrieve agent status
+		server.get('/status', function(req,res,next){
+			res.send({
+				id : config.id,
+				version : config.version,
+				state : "RUNNING"
+			}); 
+		});
+		
+		// Pause or start agent
+		server.post('/status', function(req,res,next){
+			res.send("Not implemented"); 
+		});
+
+		// Get agent configuration
+		server.get('/configuration', function(req,res,next){
+			res.send("Not implemented"); 
+		});
+
+		// Update agent configuration
+		server.post('/configuration', function(req,res,next){
+			res.send("Not implemented"); 
+		});
+
+		// Get transfers (and status of the same)
+		server.get('/transfer', function(req,res,next){
+			res.send("Not implemented"); 
+		});
+
+		// Update transfer status (pause or resume)
+		server.post('/transfer/:id', function(req,res,next){
+			res.send("Not implemented"); 
+		});
 
 		//-------------------------
 		// Start the REST interface

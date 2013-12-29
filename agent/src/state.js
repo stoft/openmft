@@ -10,7 +10,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function() {
+	var create = function(config) {
 		//-----------------------
 		// Hidden state variables
 		//-----------------------
@@ -97,7 +97,7 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function() {
-        return create();
+    module.exports.create = function(config) {
+        return create(config);
     }
 }());

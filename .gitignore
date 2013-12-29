@@ -1,0 +1,24 @@
+#########################
+# Generic files to ignore
+#########################
+*~
+*.lock
+*.DS_Store
+*.swp
+*.out
+
+#################
+# Ignore all logs
+#################
+*.log
+
+##########################
+# Ignore all runtime files
+##########################
+agent/var/
+agent/etc/
+!agent/etc/default/
+
+admin/var/
+admin/etc/
+!admin/etc/default/
