@@ -11,14 +11,17 @@
 	}
 	*/
 	
-	var create = function(state) {
-		var watcher = chokidar.watch('/var/tmp/openmft', {ignored: /[\/\\]\./});
-		watcher
-			.on('add', state.addFileToQueue );
+	var create = function(state, config) {
+		config.triggers.forEach(function(trigger){
+			console.log("Monitoring: " + trigger.dir);
+			var watcher = chokidar.watch(trigger.dir, {ignored: /[\/\\]\./});
+			watcher
+				.on('add', state.addFileToQueue );
+		});
 	};
 
-    module.exports.create = function(state) {
-        return create(state);
+    module.exports.create = function(state, config) {
+        return create(state, config);
     }
 }());
 

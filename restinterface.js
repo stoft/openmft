@@ -2,7 +2,7 @@
 	var restify = require('restify');
 	var fs = require('fs');
 
-	var create = function(state) {
+	var create = function(state, config) {
 
 		var server = restify.createServer();
 		
@@ -27,13 +27,13 @@
 			});
 		});
 
-		server.listen(8080, function() {
+		server.listen(config.port, function() {
 		  console.log('%s listening at %s', server.name, server.url);
 		});
 
 	};
 
-    module.exports.create = function(state) {
-        return create(state);
+    module.exports.create = function(state, config) {
+        return create(state, config);
     }
 }());

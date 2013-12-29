@@ -14,12 +14,12 @@
 				return fileQueue[ id ];
 			},
 
-			deleteQueueItem: function( id ){
+			deleteQueueItem: function( id ) {
 				console.log("Deleting item: " + id );
 				fileQueue.splice(this.getQueueItemIndex( id ), 1);
 			},
 
-			getQueueItemIndex: function(id){
+			getQueueItemIndex: function(id) {
 				var index = -1;
 				for (var i = 0; i < fileQueue.length; i++) {
 					if ( fileQueue[i].id == id) {
