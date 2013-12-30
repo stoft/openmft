@@ -24,7 +24,11 @@
       "plugins/router",
       "durandal/app"
     ],
-    "/javascripts/app/viewmodels/transfer.js": []
+    "/javascripts/app/viewmodels/transfer.js": [
+      "plugins/http",
+      "durandal/app",
+      "knockout"
+    ]
   },
   "aliases": {
     "/javascripts/app/main.js": {

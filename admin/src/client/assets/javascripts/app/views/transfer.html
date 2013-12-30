@@ -1,8 +1,19 @@
 ﻿<section>
-    <h2 data-bind="html:displayName"></h2>
-    <blockquote data-bind="html:description"></blockquote>
-    <h3>Features</h3>
-    <ul data-bind="foreach: features">
-        <li data-bind="html: $data"></li>
-    </ul>
+    <h2 data-bind="html: displayName"></h2>
+    <div class="row-fluid">
+    	<table class="table">
+    		<thead>
+    			<tr>
+    				<th>Id</th>
+    				<th>Version</th>
+    			</tr>
+    		</thead>
+	        <tbody data-bind="foreach: transfers">
+	        	<tr>
+	        		<td data-bind="text: id"></td>
+	        		<td data-bind="text: version"></td>
+	        	</tr>
+	        </tbody>
+    	</table>
+    </div>
 </section>

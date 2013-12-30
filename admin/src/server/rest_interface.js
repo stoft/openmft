@@ -59,11 +59,20 @@
 
 		// List all agents
 		server.get('/rest/agent', function(req, res, next) {
-			//console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
 			res.send(state.getResources("agent"));
 		});
 
-		// Update agent status (and verify configuration)
+		// Get agent details
+		server.get('/rest/agent/:id', function(req, res, next) {
+			res.send(state.getResource("agent", req.params.id));
+		});
+
+		// Update agent (pause/resume)
+		server.post('/rest/agent/:id', function(req, res, next) {
+			res.send("Not implemented yet");
+		});
+
+		// Update agent status (and verify configuration?)
 		server.put('/rest/agent/:id', function(req, res, next) {
 			// console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
 			// // Update agents array/file
@@ -79,18 +88,46 @@
 			res.send("Not implemented yet");
 		});
 
+		// List all transfers
+		server.get('/rest/transfer', function(req, res, next) {
+			res.send(state.getResources("transfer"));
+		});
+
+		// Create transfer
+		server.put('/rest/transfer/:id', function(req, res, next) {
+			res.send("Not implemented yet");
+		});
+
+		// Get transfer details
+		server.get('/rest/transfer/:id', function(req, res, next) {
+			res.send(state.getResource("transfer", req.params.id));
+		});
+
+		// Update transfer
+		server.post('/rest/transfer/:id', function(req, res, next) {
+			res.send("Not implemented yet");
+		});
+
+		// Delete transfer
+		server.del('/rest/transfer/:id', function(req, res, next) {
+			res.send("Not implemented yet");
+		});
+
+		//---------------------
 		// Serve static content
+		//---------------------
 		server.get(/javascripts\/.*/, serve);
 		server.get(/font\/.*/, serve);
 		server.get(/images\/.*/, serve);
 		server.get(/stylesheets\/.*/, serve);
 		server.get(/x\/.*/, serve);
 		server.get(/test.txt/, serve);
-
 		// Anything else is redirected to SPA (index.html)
 		server.get(/.*/, serveIndex);
 
+		//-------------
 		// Start server
+		//-------------
 		server.listen(config.port, function() {
 		  console.log('%s listening at %s', server.name, server.url);
 		});
