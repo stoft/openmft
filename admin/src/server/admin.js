@@ -12,6 +12,7 @@
 	var fs = require('fs');
 	var mime = require('mime');
 	var restInterface = require('./rest_interface.js');
+	var stateModule = require('./state.js');
 
 	//-----------------------------------
 	// Initialize and start admin process
@@ -27,29 +28,20 @@
 		console.log("Reading configuration file: " + configFile);
 		var config = JSON.parse(fs.readFileSync(configFile));
 		if (config.version != expectedVersion) {
-			console.log("Mismatch of agent binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
+			console.log("Mismatch of admin binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
 			process.exit(1);
 		}
 
 		//-------------------------
-		// Read agent state
+		// Load resource state
 		//-------------------------
-		var agentsFile = config.runtimeDir + "/agents.json";
-		console.log("Reading agents file: " + agentsFile);
-		var agents = [];
-		try {
-			agents = JSON.parse(fs.readFileSync(agentsFile));
-		}
-		catch (e) {
-		  	// Write a fresh agents files (error most likely to file being missing...)
-		  	fs.writeFileSync(agentsFile, JSON.stringify(agents));
-		}
+		stateModule.load(config, ['agent', 'transfer'], function(loadedState) {
+			// Initialize server
+			var server = restInterface.create(config, loadedState);
 
-		// Initialize server
-		var server = restInterface.create(config, agents);
-
-		// Mimosa wants us to invoke the callback
-		callback(server);
+			// Mimosa wants us to invoke the callback
+			callback(server);
+		});
 	}
 
 	//---------------

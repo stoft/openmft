@@ -13,20 +13,69 @@
 	//----------
 	// Functions
 	//----------
-	var load = function(config, resourceName) {
+	var load = function(config, resourceName, callback) {
+		// ResourceSet state
+		var that = this;
+		var resources = [];
+		// ResourceSet object
+		var object = {
+			// Return the resource type name
+			getResourceType: function() {
+				return resourceName;
+			},
+			// Get array index of a resource
+			getResourceIndex: function(id) {
+				var index = -1;
+				for (var i = 0; i < resources.length && index == -1; i++)
+					if (resources[i].id == id)
+						index = i;
+				return index;
+			},
+			// Get a resource with a specific id
+			getResource: function(id) {
+				return resources[this.getResourceIndex(id)];
+			},
+			// Get all resources
+			listResources: function() {
+				return resources;
+			},
+			// Add a resource (update if resource already exists)
+			addResource: function(resource) {
+				if (this.getResourceIndex(resource.id) != -1)
+					this.removeResource(resource.id);
+				resources.push(resource);
+			},
+			// Remove a resource with a specific id
+			removeResource: function(id) {
+				resources.splice(this.getResourceIndex(id), 1);
+			}
+		}
+
 		//-------------------------
 		// Read persisted resources
 		//-------------------------
 		var resourceFilename = config.runtimeDir + "/" + resourceName + ".json";
-		console.log("Loading " + resourceName + "s: " + resourceFilename);
-		var resources = [];
-		try {
-			resources = JSON.parse(fs.readFileSync(resourceFilename));
-		}
-		catch (e) {
-		  	// Write a fresh resources files (error most likely to file being missing...)
-		  	fs.writeFileSync(resourceFilename, JSON.stringify(resources));
-		}
+		console.log("[resource_set] Loading " + resourceName + "s: " + resourceFilename);
+		// Read resource_set asynchronously
+		fs.readFile(resourceFilename, function(err, data) {
+			if (! err) {
+				resources = JSON.parse(data);
+				console.log("[resource_set] Loaded " + resourceName + "s (" + resources.length + ")");
+				// Return loaded result set object asynchronously
+				if (callback)
+					callback(object);
+			}
+			else {
+			  	// Write a fresh resources files (error most likely to file being missing...)
+			  	fs.writeFile(resourceFilename, JSON.stringify(resources), function(err) {
+			  		if (err)
+			  			console.log("[resource_set] BIG ERROR: Could not write resource set state to disk");
+			  		console.log("[resource_set] Created new " + resourceName + " file");
+			  		if (callback)
+			  			callback(object);
+			  	});
+			}
+		});
 
 		// server.put('/rest/agent/:id', function(req, res, next) {
 		// 	console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
@@ -43,30 +92,13 @@
 		// 	res.send("ok");
 		// });
 
-		return {
-			// Get a resource with a specific id
-			get: function(id) {
-				return "Not implemented yet";
-			}
-			// Get all resources
-			list: function() {
-				return resources;
-			}
-			// Add a resource (update if resource already exists)
-			add: function(resource) {
-				return "Not implemented yet";
-			}
-			// Remove a resource with a specific id
-			remove: function(id) {
-				return "Not implemented yet";
-			}
-		}
+		return object;
 	}
 
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.load = function(config, resourceName) {
-        return load(config, resourceName);
+    module.exports.load = function(config, resourceName, callback) {
+        return load(config, resourceName, callback);
     }
 }());

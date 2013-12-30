@@ -51,7 +51,7 @@
 	//-----------------------------------
 	// Initialize and start agent process
 	//-----------------------------------
-	var create = function(config, agents) {
+	var create = function(config, state) {
 		// Initialize server
 		var server = restify.createServer();
 		server.use(restify.queryParser());
@@ -60,23 +60,23 @@
 		// List all agents
 		server.get('/rest/agent', function(req, res, next) {
 			//console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
-			res.send(agents);
+			res.send(state.getResources("agent"));
 		});
 
 		// Update agent status (and verify configuration)
 		server.put('/rest/agent/:id', function(req, res, next) {
-			console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
-			// Update agents array/file
-			var newAgents = [];
-			for (var i = 0; i < agents.length; i++) {
-				if (agents[i].id != req.body.id)
-					newAgents.push(agents[i]);
-			}
-			newAgents.push(req.body);
-			agents = newAgents;
-			console.log("Writing agent config to: " + agentsFile);
-			fs.writeFile(agentsFile, JSON.stringify(agents));
-			res.send("ok");
+			// console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
+			// // Update agents array/file
+			// var newAgents = [];
+			// for (var i = 0; i < agents.length; i++) {
+			// 	if (agents[i].id != req.body.id)
+			// 		newAgents.push(agents[i]);
+			// }
+			// newAgents.push(req.body);
+			// agents = newAgents;
+			// console.log("Writing agent config to: " + agentsFile);
+			// fs.writeFile(agentsFile, JSON.stringify(agents));
+			res.send("Not implemented yet");
 		});
 
 		// Serve static content
