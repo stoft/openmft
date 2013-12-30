@@ -22,3 +22,9 @@ agent/etc/
 admin/var/
 admin/etc/
 !admin/etc/default/
+
+###############################
+# Ignore built/generated files
+###############################
+admin/src/node_modules
+admin/src/public
