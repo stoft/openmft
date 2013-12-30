@@ -1,0 +1,9 @@
+{
+	"version": 0.1,
+	"domain": "${DOMAIN}",
+	"host": "localhost",
+	"port": 3300,
+	"logDir": "${BASEDIR}/log/${DOMAIN}",
+	"configDir": "${BASEDIR}/etc/${DOMAIN}",
+	"runtimeDir": "${BASEDIR}/var/${DOMAIN}/runtime"
+}

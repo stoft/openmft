@@ -1,0 +1,9 @@
+{
+	"version": 0.1,
+	"domain": "xiv",
+	"host": "localhost",
+	"port": 3300,
+	"logDir": "/Users/erikxiv/Workspace/openmft/admin/log/xiv",
+	"configDir": "/Users/erikxiv/Workspace/openmft/admin/etc/xiv",
+	"runtimeDir": "/Users/erikxiv/Workspace/openmft/admin/var/xiv/runtime"
+}

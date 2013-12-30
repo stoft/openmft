@@ -15,12 +15,12 @@
 ##########################
 # Ignore all runtime files
 ##########################
-agent/var/
-agent/etc/
+agent/var/a
+agent/etc/a
 !agent/etc/default/
 
-admin/var/
-admin/etc/
+admin/var/xiv
+admin/etc/xiv
 !admin/etc/default/
 
 ###############################

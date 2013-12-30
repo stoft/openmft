@@ -1,0 +1,14 @@
+{
+	"version": 0.1,
+	"id": "${AGENTID}",
+	"host": "localhost",
+	"port": 3301,
+	"adminHost": "localhost",
+	"adminPort": 3300,
+	"logDir": "${BASEDIR}/log/${AGENTID}",
+	"configDir": "${BASEDIR}/etc/${AGENTID}",
+	"runtimeDir": "${BASEDIR}/var/${AGENTID}/runtime",
+	"inboundDir": "${BASEDIR}/var/${AGENTID}/inbound",
+	"outboundDir": "${BASEDIR}/var/${AGENTID}/outbound",
+	"triggers" : []
+}
