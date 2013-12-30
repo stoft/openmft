@@ -62,6 +62,7 @@ exports.config =
     ]
 
   server:
+    port: 3300
     defaultServer:
       enabled: true
       onePager: true
