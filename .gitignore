@@ -15,13 +15,17 @@
 ##########################
 # Ignore all runtime files
 ##########################
-agent/var/a
-agent/etc/a
-!agent/etc/default/
+agent/var
+agent/etc/*
+!agent/etc/default
+agent/etc/default/*
+!agent/etc/default/config.json
 
-admin/var/xiv
-admin/etc/xiv
-!admin/etc/default/
+admin/var
+admin/etc/*
+!admin/etc/default
+admin/etc/default/*
+!admin/etc/default/config.json
 
 ###############################
 # Ignore built/generated files
