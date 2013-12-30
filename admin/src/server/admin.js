@@ -18,7 +18,7 @@
 	function serve(req, res, next) {
 	    var fname = path.normalize('./public' + req.path());
 
-	    console.log('GET %s maps to %s', req.path(), fname);
+	    //console.log('GET %s maps to %s', req.path(), fname);
 
 	    res.contentType = mime.lookup(fname);
 	    var f = filed(fname);
@@ -33,7 +33,7 @@
 	function serveIndex(req, res, next) {
 	    var fname = path.normalize('./views/index.html');
 
-	    console.log('GET %s maps to %s', req.path(), fname);
+	    // console.log('GET %s maps to %s', req.path(), fname);
 
 	    res.contentType = mime.lookup(fname);
 	    var f = filed(fname);
@@ -51,7 +51,7 @@
 		console.log("Working Directory: " + process.cwd());
 
 		//-------------------------
-		// Read agent configuration
+		// Read admin configuration
 		//-------------------------
 		var expectedVersion = 0.1;
 		var configFile = path.resolve('../../etc/current/config.json');
@@ -62,13 +62,41 @@
 			process.exit(1);
 		}
 
+		var agentsFile = config.runtimeDir + "/agents.json";
+		console.log("Reading agents file: " + agentsFile);
+		var agents = [];
+		try {
+			agents = JSON.parse(fs.readFileSync(agentsFile));
+		}
+		catch (e) {
+		  	// Write a fresh agents files (error most likely to file being missing...)
+		  	fs.writeFileSync(agentsFile, JSON.stringify(agents));
+		}
+
+		// Initialize server
 		var server = restify.createServer();
 		server.use(restify.queryParser());
 		server.use(restify.bodyParser({ mapParams: false }));
 
 		// REST functions
+		// List agents
+		server.get('/rest/agent', function(req, res, next) {
+			//console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
+			res.send(agents);
+		});
+
 		server.put('/rest/agent/:id', function(req, res, next) {
 			console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
+			// Update agents array/file
+			var newAgents = [];
+			for (var i = 0; i < agents.length; i++) {
+				if (agents[i].id != req.body.id)
+					newAgents.push(agents[i]);
+			}
+			newAgents.push(req.body);
+			agents = newAgents;
+			console.log("Writing agent config to: " + agentsFile);
+			fs.writeFile(agentsFile, JSON.stringify(agents));
 			res.send("ok");
 		});
 

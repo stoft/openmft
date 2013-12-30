@@ -15,7 +15,7 @@
       "durandal/viewLocator",
       "durandal/system"
     ],
-    "/javascripts/app/viewmodels/flickr.js": [
+    "/javascripts/app/viewmodels/agent.js": [
       "plugins/http",
       "durandal/app",
       "knockout"
@@ -24,7 +24,7 @@
       "plugins/router",
       "durandal/app"
     ],
-    "/javascripts/app/viewmodels/welcome.js": []
+    "/javascripts/app/viewmodels/transfer.js": []
   },
   "aliases": {
     "/javascripts/app/main.js": {

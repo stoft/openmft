@@ -5,17 +5,20 @@
     //See the "welcome" module for an example of function export.
 
     return {
-        displayName: 'Flickr',
-        images: ko.observableArray([]),
+        displayName: 'Agents',
+        agents: ko.observableArray([]),
         activate: function () {
             //the router's activator calls this function and waits for it to complete before proceding
-            if (this.images().length > 0) {
+            if (this.agents().length > 0) {
                 return;
             }
 
             var that = this;
-            return http.jsonp('http://api.flickr.com/services/feeds/photos_public.gne', { tags: 'mount ranier', tagmode: 'any', format: 'json' }, 'jsoncallback').then(function(response) {
-                that.images(response.items);
+
+            return http.get('/rest/agent').then(function(response) {
+                that.agents(response);
+                console.log(JSON.stringify(response));
+                console.log(that.agents().length);
             });
         },
         select: function(item) {
@@ -26,7 +29,8 @@
         },
         canDeactivate: function () {
             //the router's activator calls this function to see if it can leave the screen
-            return app.showMessage('Are you sure you want to leave this page?', 'Navigate', ['Yes', 'No']);
+            // return app.showMessage('Are you sure you want to leave this page?', 'Navigate', ['Yes', 'No']);
+            return true;
         }
     };
 });
