@@ -33,7 +33,7 @@ var adminClient = restify.createJsonClient({
 	url: "http://" + config.adminHost + ":" + config.adminPort,
 	version: '*'
 });
-adminClient.put("/agent/" + config.id, config, function(err, req, res, obj) {
+adminClient.put("/rest/agent/" + config.id, config, function(err, req, res, obj) {
 	if (err) {
 		console.log("Could not register with administrator: " + err);
 	}

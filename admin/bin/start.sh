@@ -11,9 +11,12 @@ DEFAULTCONFIG="$ADMINDIR/etc/$1"
 CUSTOMCONFIG="$BASEDIR"
 
 if [ -f "$DEFAULTCONFIG/config.json" ]; then
-	pushd $ADMINDIR/src > /dev/null
-	make start "$DEFAULTCONFIG"
+	mkdir -p "$ADMINDIR/etc/current"
+	cp "$DEFAULTCONFIG/config.json" "$ADMINDIR/etc/current/config.json"
+	pushd $ADMINDIR/src/client > /dev/null
+	mimosa watch -s
 	popd > /dev/null
+	# "$DEFAULTCONFIG"
 	#node "$ADMINDIR/src/agent.js" "$DEFAULTCONFIG"
 elif [ -f "$CUSTOMCONFIG/config.json" ]; then
 	node "$ADMINDIR/src/agent.js" "$CUSTOMCONFIG"

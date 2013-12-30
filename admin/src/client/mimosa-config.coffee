@@ -63,12 +63,14 @@ exports.config =
 
   server:
     port: 3300
+    path: '../server/admin.js'
     defaultServer:
-      enabled: true
+      enabled: false
       onePager: true
     views:
       compileWith: 'html'
       extension: 'html'
+      path: '../client/views'
 
   require:
     optimize:

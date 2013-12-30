@@ -1,0 +1,23 @@
+{
+  "name": "openmft-admin",
+  "version": "0.1.0",
+  "author": "Erik Larsson <erik.larsson@musiker.nu>",
+  "description": "OpenMFT Administrator",
+  "contributors": [ 
+    {
+      "name": "Rasmus Larsson",
+      "email": "rasmus.larsson@gmail.com"
+    } 
+  ],
+  "main": "./admin",
+  "dependencies" : {
+  },
+  "devDependencies": {
+  },
+  "bundledDependencies": [
+  ],  
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  }
+}
