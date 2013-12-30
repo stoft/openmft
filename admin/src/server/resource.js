@@ -1,38 +1,26 @@
 //---------------------------------------------------------------------------
-// Administrator server
-// Started by mimosa
+// Resource
+// Handles state and persistence on a resource for Administrator
 //---------------------------------------------------------------------------
 (function() {
 	//-------------
 	// Dependencies
 	//-------------
-	var restify = require('restify');
 	var path = require('path');
-	var filed = require('filed');
 	var fs = require('fs');
-	var mime = require('mime');
-	var restInterface = require('./rest_interface.js');
+	var events = require('events');
 
 	//-----------------------------------
-	// Initialize and start admin process
+	// Internal functions
+	//-----------------------------------
+	//-----------------------------------
+	// Initialize and start agent process
 	//-----------------------------------
 	var startServer = function(mimosaConfig, callback) {
 		console.log("Working Directory: " + process.cwd());
 
 		//-------------------------
 		// Read admin configuration
-		//-------------------------
-		var expectedVersion = 0.1;
-		var configFile = path.resolve('../../etc/current/config.json');
-		console.log("Reading configuration file: " + configFile);
-		var config = JSON.parse(fs.readFileSync(configFile));
-		if (config.version != expectedVersion) {
-			console.log("Mismatch of agent binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
-			process.exit(1);
-		}
-
-		//-------------------------
-		// Read agent state
 		//-------------------------
 		var agentsFile = config.runtimeDir + "/agents.json";
 		console.log("Reading agents file: " + agentsFile);
@@ -45,11 +33,22 @@
 		  	fs.writeFileSync(agentsFile, JSON.stringify(agents));
 		}
 
-		// Initialize server
-		var server = restInterface.create(config, agents);
 
-		// Mimosa wants us to invoke the callback
-		callback(server);
+		server.put('/rest/agent/:id', function(req, res, next) {
+			console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
+			// Update agents array/file
+			var newAgents = [];
+			for (var i = 0; i < agents.length; i++) {
+				if (agents[i].id != req.body.id)
+					newAgents.push(agents[i]);
+			}
+			newAgents.push(req.body);
+			agents = newAgents;
+			console.log("Writing agent config to: " + agentsFile);
+			fs.writeFile(agentsFile, JSON.stringify(agents));
+			res.send("ok");
+		});
+
 	}
 
 	//---------------
