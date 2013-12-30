@@ -9,8 +9,9 @@ A notification is defined as:
 ```json
 { 
 	"filename" : "<path>",
-	"id" : "notificationCounter", 
-	"target" : "target",
-	"fileId": "file.id" 
+	"id" : "<notificationId>", 
+	"target" : "<targetId>",
+	"fileId": "fileId",
+	"transfer": "transferId" 
 }
 ```
