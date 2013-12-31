@@ -16,6 +16,7 @@
 	var load = function(config, resourceName, callback) {
 		// ResourceSet state
 		var that = this;
+		var filename = null;
 		var resources = [];
 		var idCounter = 1;
 		// ResourceSet object
@@ -49,6 +50,7 @@
 				// Create resource version
 				data.version = 1;
 				resources.push(data);
+				this.persist();
 				return data;
 			},
 			// Update a resource
@@ -68,21 +70,30 @@
 					}
 				}
 				resource.version++;
+				this.persist();
 				return resource;
 			},
 			// Remove a resource with a specific id
 			deleteResource: function(id) {
 				resources.splice(this.getResourceIndex(id), 1);
+				this.persist();
+			},
+			// Persist resource set to file
+			persist: function() {
+			  	fs.writeFile(filename, JSON.stringify(resources), function(err) {
+			  		if (err)
+			  			throw new Error("[resource_set] BIG ERROR: Could not write resource set state to disk");
+			  	});
 			}
 		}
 
 		//-------------------------
 		// Read persisted resources
 		//-------------------------
-		var resourceFilename = config.runtimeDir + "/" + resourceName + ".json";
-		console.log("[resource_set] Loading " + resourceName + "s: " + resourceFilename);
+		filename = config.runtimeDir + "/" + resourceName + ".json";
+		console.log("[resource_set] Loading " + resourceName + "s: " + filename);
 		// Read resource_set asynchronously
-		fs.readFile(resourceFilename, function(err, data) {
+		fs.readFile(filename, function(err, data) {
 			if (! err) {
 				resources = JSON.parse(data);
 				console.log("[resource_set] Loaded " + resourceName + "s (" + resources.length + ")");
@@ -92,7 +103,7 @@
 			}
 			else {
 			  	// Write a fresh resources files (error most likely to file being missing...)
-			  	fs.writeFile(resourceFilename, JSON.stringify(resources), function(err) {
+			  	fs.writeFile(filename, JSON.stringify(resources), function(err) {
 			  		if (err)
 			  			console.log("[resource_set] BIG ERROR: Could not write resource set state to disk");
 			  		console.log("[resource_set] Created new " + resourceName + " file");
@@ -112,8 +123,8 @@
 		// 	}
 		// 	newAgents.push(req.body);
 		// 	resources = newAgents;
-		// 	console.log("Writing agent config to: " + resourceFilename);
-		// 	fs.writeFile(resourceFilename, JSON.stringify(resources));
+		// 	console.log("Writing agent config to: " + filename);
+		// 	fs.writeFile(filename, JSON.stringify(resources));
 		// 	res.send("ok");
 		// });
 
