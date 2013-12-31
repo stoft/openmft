@@ -1,5 +1,5 @@
 {
-	"version": 0.1,
+	"configVersion": 0.1,
 	"domain": "${DOMAIN}",
 	"host": "localhost",
 	"port": 3300,

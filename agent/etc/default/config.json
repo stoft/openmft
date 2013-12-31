@@ -1,6 +1,6 @@
 {
-	"version": 0.1,
-	"id": "${AGENTID}",
+	"configVersion": 0.1,
+	"name": "${AGENTID}",
 	"host": "localhost",
 	"port": 3301,
 	"adminHost": "localhost",

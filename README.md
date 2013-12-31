@@ -2,7 +2,79 @@
 
 A simpler and better way to manage file transfers for enterprises
 
-## Objects
+# Table of Contents
+
+* [Install and start](#install-and-start)
+
+## Install and start
+
+### Download software
+
+> git clone git@github.com:stoft/openmft.git
+
+### Administrator
+
+#### Install
+
+> $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
+
+#### Configure
+
+Optionally modify configuration parameters to your liking:
+> $OPENMFT_HOME/admin/etc/_DOMAIN_/config.json
+
+```json
+{
+	"configVersion": 0.1,
+	"domain": "${DOMAIN}",
+	"host": "localhost",
+	"port": 3300,
+	"logDir": "${BASEDIR}/log/${DOMAIN}",
+	"configDir": "${BASEDIR}/etc/${DOMAIN}",
+	"runtimeDir": "${BASEDIR}/var/${DOMAIN}/runtime"
+}
+```
+
+> $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
+
+#### Start
+
+> $OPENMFT_HOME/admin/bin/start.sh _DOMAIN_
+
+### Agent
+
+#### Install
+
+> $OPENMFT_HOME/agent/bin/install.sh _AGENTNAME_
+
+#### Configure
+
+Optionally modify configuration parameters to your liking:
+> $OPENMFT_HOME/agent/etc/_AGENTNAME_/config.json
+
+```json
+{
+	"configVersion": 0.1,
+	"name": "${AGENTNAME}",
+	"host": "localhost",
+	"port": 3301,
+	"adminHost": "localhost",
+	"adminPort": 3300,
+	"logDir": "${BASEDIR}/log/${AGENTNAME}",
+	"configDir": "${BASEDIR}/etc/${AGENTNAME}",
+	"runtimeDir": "${BASEDIR}/var/${AGENTNAME}/runtime",
+	"inboundDir": "${BASEDIR}/var/${AGENTNAME}/inbound",
+	"outboundDir": "${BASEDIR}/var/${AGENTNAME}/outbound",
+	"triggers" : []
+}
+```
+
+#### Start
+
+> $OPENMFT_HOME/agent/bin/start.sh _agent_name_
+
+
+## Resources
 
 ### Notification
 A notification is defined as:
