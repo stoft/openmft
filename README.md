@@ -19,35 +19,35 @@ A notification is defined as:
 
 ### Agent
 
-Property | Type | Description
---- | --- | ---
-id | int | Unique identifier set by the administrator upon agent first discovery
-version | int | The current resource version (maintained by Administrator). Used to keep track of and verify that changes has been propagated properly
-name | string | Human-friendly name of agent (not necessarily unique)
-host | string | Name of host (or DNS-alias) for the agent
-port | int | TCP port that the agent listens to
-inboundDir | string | Root directory that the agent monitors for inbound files (from external source to the MFT network)
-outboundDir | string | Root directory where the agent puts outbound files (from the MFT network to an external source)
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+id | int | Unique identifier set by the administrator upon agent first discovery | | M | M | M
+version | int | The current resource version (maintained by Administrator). Used to keep track of and verify that changes has been propagated properly | | | M |
+name | string | Human-friendly name of agent (unique per host) | M | | O |
+host | string | Name of host (or DNS-alias) for the agent | M | | O |
+port | int | TCP port that the agent listens to | M | | O |
+inboundDir | string | Root directory that the agent monitors for inbound files (from external source to the MFT network) | M | | O |
+outboundDir | string | Root directory where the agent puts outbound files (from the MFT network to an external source) | M | | O |
 
 ### Transfer
 
-Property | Type | Description
---- | --- | ---
-id | int | Unique identifier set by the administrator upon transfer creation
-version | int | The current resource version (maintained by Administrator). Used to keep track of and verify that changes has been propagated properly
-name | string | Human-friendly name of transfer = message type = directory name for inbound/outbound files
-sources | list of transfer sources | Agents that the transfer may originate from
-targets | list of transfer targets | Agents that the transfer will target
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+id | int | Unique identifier set by the administrator upon transfer creation | | M | M | M
+version | int | The current resource version (maintained by Administrator). Used to keep track of and verify that changes has been propagated properly | | | M |
+name | string | Human-friendly name of transfer = message type = directory name for inbound/outbound files | M | | O |
+sources | list of transfer sources | Agents that the transfer may originate from | M | | O |
+targets | list of transfer targets | Agents that the transfer will target | M | | O |
 
 #### Transfer Source
-Property | Type | Description
---- | --- | ---
-agentId | int | Unique identifier for the source agent
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+agentId | int | Unique identifier for the source agent | M | M | M | M
 
 #### Transfer Target
-Property | Type | Description
---- | --- | ---
-agentId | int | Unique identifier for the target agent
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+agentId | int | Unique identifier for the target agent | M | M | M | M
 
 
 
