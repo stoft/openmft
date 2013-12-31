@@ -131,6 +131,15 @@ agentId | int | Unique identifier for the target agent | M | M | M | M
 
 ## Interfaces
 
+### HTTP Status Codes Used
+
+When | Status Code
+--- | ---
+Request was processed as expected | 200 (OK)
+Request was incorrect (invalid data or url) | 400 (Bad Request)
+Resource was not found | 404 (Not Found)
+Request was correct but an error occurred while processing | 500 (Internal Server Error)
+
 ### Administrator Interface
 
 Path | Verb | Description | Parameters | Request | Response

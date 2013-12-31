@@ -17,5 +17,20 @@
 				<method name="DELETE"/>
 			</resource>
 		</resource>
+		<resource path="transfers">
+			<method name="GET">
+				<request>
+					<param default="0" name="offset" required="false" style="query"/>
+					<param default="10" name="limit" required="false" style="query"/>
+				</request>
+			</method>
+			<method name="POST"/>
+			<resource path="{transferId}">
+				<param name="transferId" required="true" style="template"/>
+				<method name="GET"/>
+				<method name="PUT"/>
+				<method name="DELETE"/>
+			</resource>
+		</resource>
 	</resources>
 </application>

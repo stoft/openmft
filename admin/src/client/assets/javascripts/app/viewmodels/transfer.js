@@ -12,7 +12,7 @@
             var that = this;
 
             return http.get('/rest/v1/transfers').then(function(response) {
-                that.transfers(response);
+                that.transfers(response.transfers);
                 console.log(JSON.stringify(response, null, 4));
                 console.log(that.transfers().length);
             });

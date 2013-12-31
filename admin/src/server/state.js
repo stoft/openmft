@@ -36,6 +36,14 @@
 			getResource: function(type, id) {
 				return this.getResourceSet(type).getResource(id);
 			},
+			// Get a resource of a specific type and id
+			updateResource: function(type, id, data) {
+				return this.getResourceSet(type).updateResource(id, data);
+			},
+			// Get a resource of a specific type and id
+			deleteResource: function(type, id) {
+				return this.getResourceSet(type).deleteResource(id);
+			},
 			// Get all resources of a specific type
 			getResources: function(type) {
 				return this.getResourceSet(type).listResources();

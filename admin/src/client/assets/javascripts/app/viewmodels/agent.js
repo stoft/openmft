@@ -12,7 +12,7 @@
             var that = this;
 
             return http.get('/rest/v1/agents').then(function(response) {
-                that.agents(response);
+                that.agents(response.agents);
                 console.log(JSON.stringify(response, null, 4));
                 console.log(that.agents().length);
             });

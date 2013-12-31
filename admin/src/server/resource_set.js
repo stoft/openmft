@@ -51,8 +51,27 @@
 				resources.push(data);
 				return data;
 			},
+			// Update a resource
+			updateResource: function(id, data) {
+				var resource = this.getResource(id);
+				if (! resource)
+					throw new Error("Resource not found, update failed");
+				// ToDo: Validate data
+				// Validate version (to avoid out-of-sync updates)
+				if (resource.version != data.version)
+					throw new Error("Out-of-date update blocked");
+				// ToDo: Map data to admin structure
+				for (key in data) {
+					if (key != "id" && key != "version") {
+						// console.log("Updating " + key + " from " + resource[key] + " to " + data[key]);
+						resource[key] = data[key];
+					}
+				}
+				resource.version++;
+				return resource;
+			},
 			// Remove a resource with a specific id
-			removeResource: function(id) {
+			deleteResource: function(id) {
 				resources.splice(this.getResourceIndex(id), 1);
 			}
 		}

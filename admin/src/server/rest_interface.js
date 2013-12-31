@@ -59,7 +59,8 @@
 
 		// List all agents
 		server.get('/rest/v1/agents', function(req, res, next) {
-			res.send(state.getResources("agent"));
+			var agents = state.getResources("agent");
+			res.send({agents: agents});
 		});
 
 		// Create agent
@@ -70,52 +71,47 @@
 
 		// Get agent details
 		server.get('/rest/v1/agents/:id', function(req, res, next) {
-			res.send(state.getResource("agent", req.params.id));
+			var agent = state.getResource("agent", req.params.id);
+			if (agent)
+				res.send({agent: agent});
+			else
+				return next(new restify.ResourceNotFoundError('%s does not exist', req.url));
 		});
 
 		// Update agent
-		server.post('/rest/v1/agents/:id', function(req, res, next) {
-			// console.log("Agent checked in ("+req.params.id+"): " + JSON.stringify(req.body));
-			// // Update agents array/file
-			// var newAgents = [];
-			// for (var i = 0; i < agents.length; i++) {
-			// 	if (agents[i].id != req.body.id)
-			// 		newAgents.push(agents[i]);
-			// }
-			// newAgents.push(req.body);
-			// agents = newAgents;
-			// console.log("Writing agent config to: " + agentsFile);
-			// fs.writeFile(agentsFile, JSON.stringify(agents));
-			res.send("Not implemented yet");
+		server.put('/rest/v1/agents/:id', function(req, res, next) {
+			var agent = state.updateResource("agent", req.params.id, req.body);
+			res.send({agent: agent});
 		});
 
 		// Delete agent
 		server.del('/rest/v1/agents/:id', function(req, res, next) {
-			res.send("Not implemented yet");
+			state.deleteResource("agent", req.params.id);
+			res.send("ok");
 		});
 
 		// List all transfers
-		server.get('/rest/v1/transfer', function(req, res, next) {
+		server.get('/rest/v1/transfers', function(req, res, next) {
 			res.send(state.getResources("transfer"));
 		});
 
 		// Create transfer
-		server.put('/rest/v1/transfer/:id', function(req, res, next) {
+		server.post('/rest/v1/transfers', function(req, res, next) {
 			res.send("Not implemented yet");
 		});
 
 		// Get transfer details
-		server.get('/rest/v1/transfer/:id', function(req, res, next) {
+		server.get('/rest/v1/transfers/:id', function(req, res, next) {
 			res.send(state.getResource("transfer", req.params.id));
 		});
 
 		// Update transfer
-		server.post('/rest/v1/transfer/:id', function(req, res, next) {
+		server.put('/rest/v1/transfers/:id', function(req, res, next) {
 			res.send("Not implemented yet");
 		});
 
 		// Delete transfer
-		server.del('/rest/v1/transfer/:id', function(req, res, next) {
+		server.del('/rest/v1/transfers/:id', function(req, res, next) {
 			res.send("Not implemented yet");
 		});
 
