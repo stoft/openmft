@@ -1,10 +1,16 @@
-# openmft
+# OpenMFT
 
-A simpler and better way to manage file transfers for enterprises
+A simpler way to manage file transfers for enterprises
 
 # Table of Contents
 
 * [Install and start](#install-and-start)
+* [Resources](#resources)
+  * [Notification](#notification)
+  * [Agent](#agent)
+  * [Transfer](#transfer)
+* [Interfaces](#interfaces)
+  * [Administrator](#administrator-interface)
 
 ## Install and start
 
@@ -125,7 +131,7 @@ agentId | int | Unique identifier for the target agent | M | M | M | M
 
 ## Interfaces
 
-### Administrator
+### Administrator Interface
 
 Path | Verb | Description | Parameters | Request | Response
 --- | --- | --- | --- | --- | ---
