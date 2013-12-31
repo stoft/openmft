@@ -6,9 +6,9 @@ A simpler way to manage file transfers for enterprises
 
 * [Install and start](#install-and-start)
 * [Resources](#resources)
-  * [Notification](#notification)
-  * [Agent](#agent)
-  * [Transfer](#transfer)
+  * [Notification](#notification-resource)
+  * [Agent](#agent-resource)
+  * [Transfer](#transfer-resource)
 * [Interfaces](#interfaces)
   * [Administrator](#administrator-interface)
 
@@ -82,7 +82,7 @@ Optionally modify configuration parameters to your liking:
 
 ## Resources
 
-### Notification
+### Notification Resource
 A notification is defined as:
 ```json
 { 
@@ -95,7 +95,7 @@ A notification is defined as:
 }
 ```
 
-### Agent
+### Agent Resource
 
 Property | Type | Description | C | R | U | D
 --- | --- | --- | --- | --- | --- | ---
@@ -107,7 +107,7 @@ port | int | TCP port that the agent listens to | M | | O |
 inboundDir | string | Root directory that the agent monitors for inbound files (from external source to the MFT network) | M | | O |
 outboundDir | string | Root directory where the agent puts outbound files (from the MFT network to an external source) | M | | O |
 
-### Transfer
+### Transfer Resource
 
 Property | Type | Description | C | R | U | D
 --- | --- | --- | --- | --- | --- | ---
