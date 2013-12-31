@@ -2,7 +2,7 @@
 
 A simpler way to manage file transfers for enterprises
 
-# Table of Contents
+## Table of Contents
 
 * [Install and start](#install-and-start)
 * [Resources](#resources)
