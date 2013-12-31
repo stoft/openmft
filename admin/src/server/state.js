@@ -29,6 +29,10 @@
 				return rs;
 			},
 			// Get a resource of a specific type and id
+			addResource: function(type, data) {
+				return this.getResourceSet(type).addResource(data);
+			},
+			// Get a resource of a specific type and id
 			getResource: function(type, id) {
 				return this.getResourceSet(type).getResource(id);
 			},

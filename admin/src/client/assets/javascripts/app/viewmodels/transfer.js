@@ -11,7 +11,7 @@
 
             var that = this;
 
-            return http.get('/rest/transfer').then(function(response) {
+            return http.get('/rest/v1/transfers').then(function(response) {
                 that.transfers(response);
                 console.log(JSON.stringify(response, null, 4));
                 console.log(that.transfers().length);

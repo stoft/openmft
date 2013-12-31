@@ -17,6 +17,7 @@
 		// ResourceSet state
 		var that = this;
 		var resources = [];
+		var idCounter = 1;
 		// ResourceSet object
 		var object = {
 			// Return the resource type name
@@ -39,11 +40,16 @@
 			listResources: function() {
 				return resources;
 			},
-			// Add a resource (update if resource already exists)
-			addResource: function(resource) {
-				if (this.getResourceIndex(resource.id) != -1)
-					this.removeResource(resource.id);
-				resources.push(resource);
+			// Add a resource
+			addResource: function(data) {
+				// ToDo: Validate data
+				// ToDo: Map data to admin structure
+				// Generate unique id
+				data.id = idCounter++;
+				// Create resource version
+				data.version = 1;
+				resources.push(data);
+				return data;
 			},
 			// Remove a resource with a specific id
 			removeResource: function(id) {

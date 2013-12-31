@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:tns="urn:openmft:rest:admin" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<grammars/>
+	<resources base="http://localhost:3300/rest/v1/">
+		<resource path="agents">
+			<method name="GET">
+				<request>
+					<param default="0" name="offset" required="false" style="query"/>
+					<param default="10" name="limit" required="false" style="query"/>
+				</request>
+			</method>
+			<method name="POST"/>
+			<resource path="{agentId}">
+				<param name="agentId" required="true" style="template"/>
+				<method name="GET"/>
+				<method name="PUT"/>
+				<method name="DELETE"/>
+			</resource>
+		</resource>
+	</resources>
+</application>
