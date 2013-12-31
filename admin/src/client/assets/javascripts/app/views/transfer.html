@@ -6,7 +6,9 @@
     			<tr>
                     <th>Name</th>
                     <th>Id</th>
-    				<th>Version</th>
+                    <th>Version</th>
+                    <th>Sources</th>
+                    <th>Targets</th>
     			</tr>
     		</thead>
 	        <tbody data-bind="foreach: transfers">
@@ -14,6 +16,12 @@
                     <td data-bind="text: name"></td>
                     <td data-bind="text: id"></td>
 	        		<td data-bind="text: version"></td>
+                    <td data-bind="foreach: sources">
+                        [<span data-bind="text: host"/>] <span data-bind="text: inboundDir"/>/<span data-bind="text: $parent.name"/><br/>
+                    </td>
+                    <td data-bind="foreach: targets">
+                        [<span data-bind="text: host"/>] <span data-bind="text: outboundDir"/>/<span data-bind="text: $parent.name"/><br/>
+                    </td>
 	        	</tr>
 	        </tbody>
     	</table>
