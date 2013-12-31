@@ -92,28 +92,37 @@
 
 		// List all transfers
 		server.get('/rest/v1/transfers', function(req, res, next) {
-			res.send(state.getResources("transfer"));
+			var transfers = state.getResources("transfer");
+			res.send({transfers: transfers});
 		});
 
 		// Create transfer
 		server.post('/rest/v1/transfers', function(req, res, next) {
-			res.send("Not implemented yet");
+			var transfer = state.addResource("transfer", req.body);
+			res.send({transfer: transfer});
 		});
 
 		// Get transfer details
 		server.get('/rest/v1/transfers/:id', function(req, res, next) {
-			res.send(state.getResource("transfer", req.params.id));
+			var transfer = state.getResource("transfer", req.params.id);
+			if (transfer)
+				res.send({transfer: transfer});
+			else
+				return next(new restify.ResourceNotFoundError('%s does not exist', req.url));
 		});
 
 		// Update transfer
 		server.put('/rest/v1/transfers/:id', function(req, res, next) {
-			res.send("Not implemented yet");
+			var transfer = state.updateResource("transfer", req.params.id, req.body);
+			res.send({transfer: transfer});
 		});
 
 		// Delete transfer
 		server.del('/rest/v1/transfers/:id', function(req, res, next) {
-			res.send("Not implemented yet");
+			state.deleteResource("transfer", req.params.id);
+			res.send("ok");
 		});
+
 
 		//---------------------
 		// Serve static content
