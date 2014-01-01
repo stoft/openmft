@@ -108,7 +108,7 @@
 		// Create resource version
 		data.version = 1;
 		this.resources.push(data);
-		this.persist(data, callback);
+		this.persist(data, "add", callback);
 	};
 	// Update a resource (asynchronously)
 	ResourceSet.prototype.updateResource = function(id, data, callback) {
@@ -140,57 +140,35 @@
 			}.bind(this),
 			// Persist changes
 			function(resource, callback) {
-				this.persist(resource, callback);
+				this.persist(resource, "update", callback);
 			}.bind(this)
 		], function(err, result) {
 			// Call original callback
 			callback(err, result);
 		}.bind(this));
-
-		// var resource = this.getResource(id);
-		// if (! resource) {
-		// 	if (callback) {
-		// 		callback(new restify.ResourceNotFoundError("Could not find resource " + id + " of type " + this.getResourceType()));
-		// 	}
-		// 	return;
-		// }
-		// // ToDo: Validate data
-		// // Validate version (to avoid out-of-sync updates)
-		// if (resource.version != data.version) {
-		// 	if (callback) {
-		// 		callback(new restify.ConflictError("Not allowed to update " + this.getResourceType() + "/" + id +
-		// 			" (current version: " + resource.version + ") with out-of-date version (" + data.version + ")"));
-		// 	}
-		// 	return;
-		// }
-		// // ToDo: Map data to admin structure
-		// // Update resource with updated values
-		// for (var key in data) {
-		// 	// Do not allow updates of id and version
-		// 	if (key != "id" && key != "version") {
-		// 		resource[key] = data[key];
-		// 	}
-		// }
-		// resource.version++;
-		// this.persist(resource, callback);
 	};
 	// Remove a resource with a specific id (asynchronously)
 	ResourceSet.prototype.deleteResource = function(id, callback) {
 		this.resources.splice(getResourceIndex(this, id), 1);
-		this.persist(id, callback);
+		this.persist(id, "delete", callback);
 	};
 	// Persist resource set to file (asynchronously)
-	ResourceSet.prototype.persist = function(result, callback) {
+	ResourceSet.prototype.persist = function(result, eventName, callback) {
 		fs.writeFile(this.filename, JSON.stringify(this.resources), function(err) {
 			if (callback) {
 				if (err) {
 					callback(err, "Could not write resource set state to disk");
 				}
 				else {
+					// Emit an event for the change
+					var e = {};
+					e[this.getResourceType()] = result;
+					this.emit(eventName, e);
+					// Callback
 					callback(null, result);
 				}
 			}
-		});
+		}.bind(this));
 	};
 
 	//---------------

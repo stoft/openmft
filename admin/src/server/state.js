@@ -51,7 +51,6 @@
 				resourceSetOptions.filename = this.persistenceDirectory + "/" + resourceSetOptions.resourceType + ".json";
 			}
 			return resourceSet.create(resourceSetOptions, callback);
-			// this.resourceSets.push(resourceSet.create(resourceSetOptions, callback));
 		}.bind(this), function(err, results) {
 			if (err) {
 				// At least one of the resource sets failed to initialize/load
@@ -64,6 +63,19 @@
 			else {
 				// All resource sets are now initialized/loaded successfully
 				this.resourceSets = results;
+				// Subscribe to changes
+				for (var i = 0; i < this.resourceSets.length; i++) {
+					console.log("Adding subscriptions for " + this.resourceSets[i].getResourceType());
+					this.resourceSets[i].on("add", function(e) {
+						console.log("Resource added: " + JSON.stringify(e));
+					});
+					this.resourceSets[i].on("update", function(e) {
+						console.log("Resource updated: " + JSON.stringify(e));
+					});
+					this.resourceSets[i].on("delete", function(e) {
+						console.log("Resource deleted: " + JSON.stringify(e));
+					});
+				}
 				console.log("State initialized/loaded (" + this.resourceSets.length + ")");
 				this.emit("initialized", this);
 				if (callback) {
