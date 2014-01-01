@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-define(["plugins/http", "durandal/app", "knockout", "state"], function (http, app, ko, state) {
+define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], function (http, app, ko, state, bootstrap) {
 
     return {
         displayName: "Transfers",
@@ -16,6 +16,10 @@ define(["plugins/http", "durandal/app", "knockout", "state"], function (http, ap
         //     }
         //     return result;
         // },
+        test: function(agent) {
+            console.log(JSON.stringify(agent));
+            return "Hi";
+        },
         activate: function() {
             //the router's activator calls this function and waits for it to complete before proceding
             // if (this.transfers().length > 0) {

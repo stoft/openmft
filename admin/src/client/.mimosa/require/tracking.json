@@ -23,7 +23,8 @@
       "plugins/http",
       "durandal/app",
       "knockout",
-      "state"
+      "state",
+      "bootstrap"
     ],
     "/javascripts/app/viewmodels/shell.js": [
       "plugins/router",
@@ -33,7 +34,8 @@
       "plugins/http",
       "durandal/app",
       "knockout",
-      "state"
+      "state",
+      "bootstrap"
     ]
   },
   "aliases": {
