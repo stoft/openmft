@@ -11,6 +11,7 @@
 	var fs = require("fs");
 	var EventEmitter = require("events").EventEmitter;
 	var util = require("util");
+	var async = require("async");
 	var restify = require("restify");
 
 	//----------------------------
@@ -33,6 +34,12 @@
 		fs.readFile(resourceSet.filename, function(err, data) {
 			if (! err) {
 				resourceSet.resources = JSON.parse(data);
+				// Update idCounter
+				for (var i = 0; i < resourceSet.resources.length; i++) {
+					if (resourceSet.resources[i].id >= resourceSet.idCounter) {
+						resourceSet.idCounter = resourceSet.resources[i].id + 1;
+					}
+				}
 				console.log("Loaded " + resourceSet.getResourceType() + "s (" + resourceSet.resources.length + ")");
 				// Return loaded result set object asynchronously
 				if (callback) {
@@ -78,13 +85,19 @@
 	ResourceSet.prototype.getResourceType = function() {
 		return this.resourceType;
 	};
-	// Get a resource with a specific id
-	ResourceSet.prototype.getResource = function(id) {
-		return this.resources[getResourceIndex(id)];
+	// Get a resource with a specific id (asynchronously)
+	ResourceSet.prototype.getResource = function(id, callback) {
+		var resource = this.resources[getResourceIndex(this, id)];
+		if (resource) {
+			callback(null, resource);
+		}
+		else {
+			callback(new restify.ResourceNotFoundError("Could not find resource " + id + " of type " + this.getResourceType()));
+		}
 	};
-	// Get all resources
-	ResourceSet.prototype.listResources = function() {
-		return this.resources;
+	// Get all resources (asynchronously)
+	ResourceSet.prototype.listResources = function(callback) {
+		callback(null, this.resources);
 	};
 	// Add a resource (asynchronously)
 	ResourceSet.prototype.addResource = function(data, callback) {
@@ -97,38 +110,73 @@
 		this.resources.push(data);
 		this.persist(data, callback);
 	};
-	// Update a resource (asynchronously) (asynchronously)
+	// Update a resource (asynchronously)
 	ResourceSet.prototype.updateResource = function(id, data, callback) {
-		var resource = this.getResource(id);
-		if (! resource) {
-			if (callback) {
-				callback(new restify.ResourceNotFoundError("Could not find resource " + id + " of type " + this.getResourceType()));
-			}
-			return;
-		}
-		// ToDo: Validate data
-		// Validate version (to avoid out-of-sync updates)
-		if (resource.version != data.version) {
-			if (callback) {
-				callback(new restify.ConflictError("Not allowed to update " + this.getResourceType() + "/" + id +
-					" (current version: " + resource.version + ") with out-of-date version (" + data.version + ")"));
-			}
-			return;
-		}
-		// ToDo: Map data to admin structure
-		// Update resource with updated values
-		for (var key in data) {
-			// Do not allow updates of id and version
-			if (key != "id" && key != "version") {
-				resource[key] = data[key];
-			}
-		}
-		resource.version++;
-		this.persist(resource, callback);
+		async.waterfall([
+			// Get current version of resource
+			function(callback) {
+				this.getResource(id, callback);
+			}.bind(this),
+			// Verify version = current
+			function(resource, callback) {
+				if (resource.version != data.version) {
+					callback(new restify.ConflictError("Not allowed to update " + this.getResourceType() + "/" + id +
+						" (current version: " + resource.version + ") with out-of-date version (" + data.version + ")"));
+				}
+				else {
+					callback(null, resource);
+				}
+			}.bind(this),
+			// Update resource
+			function(resource, callback) {
+				for (var key in data) {
+					// Do not allow updates of id and version
+					if (key != "id" && key != "version") {
+						resource[key] = data[key];
+					}
+				}
+				resource.version++;
+				callback(null, resource);
+			}.bind(this),
+			// Persist changes
+			function(resource, callback) {
+				this.persist(resource, callback);
+			}.bind(this)
+		], function(err, result) {
+			// Call original callback
+			callback(err, result);
+		}.bind(this));
+
+		// var resource = this.getResource(id);
+		// if (! resource) {
+		// 	if (callback) {
+		// 		callback(new restify.ResourceNotFoundError("Could not find resource " + id + " of type " + this.getResourceType()));
+		// 	}
+		// 	return;
+		// }
+		// // ToDo: Validate data
+		// // Validate version (to avoid out-of-sync updates)
+		// if (resource.version != data.version) {
+		// 	if (callback) {
+		// 		callback(new restify.ConflictError("Not allowed to update " + this.getResourceType() + "/" + id +
+		// 			" (current version: " + resource.version + ") with out-of-date version (" + data.version + ")"));
+		// 	}
+		// 	return;
+		// }
+		// // ToDo: Map data to admin structure
+		// // Update resource with updated values
+		// for (var key in data) {
+		// 	// Do not allow updates of id and version
+		// 	if (key != "id" && key != "version") {
+		// 		resource[key] = data[key];
+		// 	}
+		// }
+		// resource.version++;
+		// this.persist(resource, callback);
 	};
 	// Remove a resource with a specific id (asynchronously)
 	ResourceSet.prototype.deleteResource = function(id, callback) {
-		this.resources.splice(getResourceIndex(id), 1);
+		this.resources.splice(getResourceIndex(this, id), 1);
 		this.persist(id, callback);
 	};
 	// Persist resource set to file (asynchronously)

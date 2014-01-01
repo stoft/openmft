@@ -80,20 +80,20 @@
 		getResourceSet(this, type).addResource(data, callback);
 	};
 	// Get a resource of a specific type and id
-	State.prototype.getResource = function(type, id) {
-		return this.getResourceSet(type).getResource(id);
+	State.prototype.getResource = function(type, id, callback) {
+		getResourceSet(this, type).getResource(id, callback);
 	};
 	// Update a resource (asynchronously)
 	State.prototype.updateResource = function(type, id, data, callback) {
-		this.getResourceSet(type).updateResource(id, data, callback);
+		getResourceSet(this, type).updateResource(id, data, callback);
 	};
 	// Delete a resource (asynchronously)
 	State.prototype.deleteResource = function(type, id, callback) {
-		this.getResourceSet(type).deleteResource(id, callback);
+		getResourceSet(this, type).deleteResource(id, callback);
 	};
 	// Get all resources of a specific type
-	State.prototype.getResources = function(type) {
-		return this.getResourceSet(type).listResources();
+	State.prototype.getResources = function(type, callback) {
+		getResourceSet(this, type).listResources(callback);
 	};
 
 	//---------------

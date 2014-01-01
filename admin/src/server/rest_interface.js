@@ -49,6 +49,27 @@
 	    return false;
 	}
 
+	function sendRestResponse(req, res, next, err, response, wrapperName) {
+		if (! err) {
+			var r = response;
+			// For methods that return a resource, wrap with singular/plural name of resource type
+			if (wrapperName) {
+				r = {};
+				r[wrapperName] = response;
+			}
+			res.send(r);
+			return next();
+		}
+		else {
+			return next(err);					
+		}
+	}
+
+	// Remove trailing s on resource type name
+	function singular(s) {
+		return s.substring(0, s.length-1);
+	}
+
 	//-----------------------------------
 	// Initialize and start agent process
 	//-----------------------------------
@@ -58,86 +79,40 @@
 		server.use(restify.queryParser());
 		server.use(restify.bodyParser({ mapParams: false }));
 
-		// List all agents
-		server.get("/rest/v1/agents", function(req, res, next) {
-			var agents = state.getResources("agent");
-			res.send({agents: agents});
-			return next();
+		// List all resources
+		server.get("/rest/v1/:type", function(req, res, next) {
+			state.getResources(singular(req.params.type), function(err, result) {
+				sendRestResponse(req, res, next, err, result, req.params.type);
+			});
 		});
 
-		// Create agent
-		server.post("/rest/v1/agents", function(req, res, next) {
-			var agent = state.addResource("agent", req.body);
-			res.send({agent: agent});
-			return next();
+		// Create resource
+		server.post("/rest/v1/:type", function(req, res, next) {
+			state.addResource(singular(req.params.type), req.body, function(err, result) {
+				sendRestResponse(req, res, next, err, result, singular(req.params.type));
+			});
 		});
 
-		// Get agent details
-		server.get("/rest/v1/agents/:id", function(req, res, next) {
-			var agent = state.getResource("agent", req.params.id);
-			if (agent) {
-				res.send({agent: agent});
-				return next();
-			}
-			else {
-				return next(new restify.ResourceNotFoundError("%s does not exist", req.url));
-			}
+		// Get resource details
+		server.get("/rest/v1/:type/:id", function(req, res, next) {
+			state.getResource(singular(req.params.type), req.params.id, function(err, result) {
+				sendRestResponse(req, res, next, err, result, singular(req.params.type));
+			});
 		});
 
-		// Update agent
-		server.put("/rest/v1/agents/:id", function(req, res, next) {
-			var agent = state.updateResource("agent", req.params.id, req.body);
-			res.send({agent: agent});
-			return next();
+		// Update resource
+		server.put("/rest/v1/:type/:id", function(req, res, next) {
+			state.updateResource(singular(req.params.type), req.params.id, req.body, function(err, result) {
+				sendRestResponse(req, res, next, err, result, singular(req.params.type));
+			});
 		});
 
-		// Delete agent
-		server.del("/rest/v1/agents/:id", function(req, res, next) {
-			state.deleteResource("agent", req.params.id);
-			res.send("ok");
-			return next();
+		// Delete resource
+		server.del("/rest/v1/:type/:id", function(req, res, next) {
+			state.deleteResource(singular(req.params.type), req.params.id, function(err) {
+				sendRestResponse(req, res, next, err, "ok");
+			});
 		});
-
-		// List all transfers
-		server.get("/rest/v1/transfers", function(req, res, next) {
-			var transfers = state.getResources("transfer");
-			res.send({transfers: transfers});
-			return next();
-		});
-
-		// Create transfer
-		server.post("/rest/v1/transfers", function(req, res, next) {
-			var transfer = state.addResource("transfer", req.body);
-			res.send({transfer: transfer});
-			return next();
-		});
-
-		// Get transfer details
-		server.get("/rest/v1/transfers/:id", function(req, res, next) {
-			var transfer = state.getResource("transfer", req.params.id);
-			if (transfer) {
-				res.send({transfer: transfer});
-				return next();
-			}
-			else {
-				return next(new restify.ResourceNotFoundError("%s does not exist", req.url));
-			}
-		});
-
-		// Update transfer
-		server.put("/rest/v1/transfers/:id", function(req, res, next) {
-			var transfer = state.updateResource("transfer", req.params.id, req.body);
-			res.send({transfer: transfer});
-			return next();
-		});
-
-		// Delete transfer
-		server.del("/rest/v1/transfers/:id", function(req, res, next) {
-			state.deleteResource("transfer", req.params.id);
-			res.send("ok");
-			return next();
-		});
-
 
 		//---------------------
 		// Serve static content
