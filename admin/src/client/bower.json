@@ -7,7 +7,7 @@
     "requirejs-text":"2.0.3",
     "knockout.js":"2.3.0",
     "async":"0.2.x",
-    "bootstrap":"2.3.2",
+    "bootstrap":"3.0.x",
     "font-awesome":"3.2.1",
     "durandal":"2.0.1"
   }
