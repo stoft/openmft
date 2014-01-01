@@ -27,6 +27,7 @@ exports.config =
   bower:
     copy:
       mainOverrides:
+        "async":["lib/async.js"]
         "knockout.js":["knockout.js","knockout-2.3.0.debug.js"]
         "bootstrap": [
           "docs/assets/js/bootstrap.js"

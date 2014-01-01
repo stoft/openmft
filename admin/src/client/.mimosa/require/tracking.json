@@ -15,10 +15,15 @@
       "durandal/viewLocator",
       "durandal/system"
     ],
+    "/javascripts/app/state.js": [
+      "knockout",
+      "async"
+    ],
     "/javascripts/app/viewmodels/agent.js": [
       "plugins/http",
       "durandal/app",
-      "knockout"
+      "knockout",
+      "state"
     ],
     "/javascripts/app/viewmodels/shell.js": [
       "plugins/router",
@@ -27,7 +32,8 @@
     "/javascripts/app/viewmodels/transfer.js": [
       "plugins/http",
       "durandal/app",
-      "knockout"
+      "knockout",
+      "state"
     ]
   },
   "aliases": {
@@ -37,6 +43,7 @@
       "jquery": "../vendor/jquery/jquery",
       "bootstrap": "../vendor/bootstrap/bootstrap",
       "durandal": "../vendor/durandal",
+      "async": "../vendor/async/async",
       "plugins": "../vendor/durandal/plugins",
       "transitions": "../vendor/durandal/transitions"
     }
@@ -63,7 +70,11 @@
       "bootstrap": "../vendor/bootstrap/bootstrap",
       "durandal": "../vendor/durandal",
       "plugins": "../vendor/durandal/plugins",
-      "transitions": "../vendor/durandal/transitions"
+      "transitions": "../vendor/durandal/transitions",
+      "socket.io": "../vendor/socket.io",
+      "socket.io-client": "../vendor/socket.io-client",
+      "state": "../app/state",
+      "async": "../vendor/async/async"
     }
   },
   "requireFiles": [

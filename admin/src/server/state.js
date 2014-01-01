@@ -63,18 +63,21 @@
 			else {
 				// All resource sets are now initialized/loaded successfully
 				this.resourceSets = results;
-				// Subscribe to changes
+				// Subscribe to changes (resubmit them)
 				for (var i = 0; i < this.resourceSets.length; i++) {
 					console.log("Adding subscriptions for " + this.resourceSets[i].getResourceType());
 					this.resourceSets[i].on("add", function(e) {
 						console.log("Resource added: " + JSON.stringify(e));
-					});
+						this.emit("add", e);
+					}.bind(this));
 					this.resourceSets[i].on("update", function(e) {
 						console.log("Resource updated: " + JSON.stringify(e));
-					});
+						this.emit("update", e);
+					}.bind(this));
 					this.resourceSets[i].on("delete", function(e) {
 						console.log("Resource deleted: " + JSON.stringify(e));
-					});
+						this.emit("delete", e);
+					}.bind(this));
 				}
 				console.log("State initialized/loaded (" + this.resourceSets.length + ")");
 				this.emit("initialized", this);

@@ -1,5 +1,6 @@
 ﻿<section>
     <h2 data-bind="html: displayName"></h2>
+    Initialized: <span data-bind="text: state.isInitialized"/>
     <div class="row-fluid">
     	<table class="table">
     		<thead>
@@ -11,16 +12,20 @@
                     <th>Targets</th>
     			</tr>
     		</thead>
-	        <tbody data-bind="foreach: transfers">
+	        <tbody data-bind="foreach: state.transfers">
 	        	<tr>
                     <td data-bind="text: name"></td>
                     <td data-bind="text: id"></td>
 	        		<td data-bind="text: version"></td>
                     <td data-bind="foreach: sources">
-                        [<span data-bind="text: host"/>] <span data-bind="text: inboundDir"/>/<span data-bind="text: $parent.name"/><br/>
+                        <!-- ko with: $root.state.getAgent(agentId) -->
+                        [<span data-bind="text: host"/>] <span data-bind="text: inboundDir"/>/<span data-bind="text: $parents[1].name"/><br/>
+                        <!-- /ko -->
                     </td>
                     <td data-bind="foreach: targets">
-                        [<span data-bind="text: host"/>] <span data-bind="text: outboundDir"/>/<span data-bind="text: $parent.name"/><br/>
+                        <!-- ko with: $root.state.getAgent(agentId) -->
+                        [<span data-bind="text: host"/>] <span data-bind="text: outboundDir"/>/<span data-bind="text: $parents[1].name"/><br/>
+                        <!-- /ko -->
                     </td>
 	        	</tr>
 	        </tbody>

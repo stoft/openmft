@@ -1,11 +1,12 @@
 {
-  "name": "Durandal Mimosa Skeleton",
+  "name": "OpenMFT admin client",
   "version": "2.0.1",
   "dependencies": {
     "jquery": "1.9.1",
     "requirejs": "2.1.8",
     "requirejs-text": "2.0.3",
     "knockout.js": "2.3.0",
+    "async": "0.2.x",
     "bootstrap": "2.3.2",
     "font-awesome": "3.2.1",
     "durandal": "2.0.1"

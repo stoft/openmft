@@ -161,7 +161,10 @@
 				}
 				else {
 					// Emit an event for the change
-					var e = {};
+					var e = {
+						eventType: eventName,
+						resourceType: this.getResourceType()
+					};
 					e[this.getResourceType()] = result;
 					this.emit(eventName, e);
 					// Callback

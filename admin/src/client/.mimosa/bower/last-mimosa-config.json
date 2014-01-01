@@ -15,6 +15,9 @@
     "exclude": [],
     "unknownMainFullCopy": false,
     "overridesArrays": {
+      "async": [
+        "lib/async.js"
+      ],
       "knockout.js": [
         "knockout.js",
         "knockout-2.3.0.debug.js"
@@ -40,6 +43,9 @@
       }
     },
     "mainOverrides": {
+      "async": [
+        "lib/async.js"
+      ],
       "knockout.js": [
         "knockout.js",
         "knockout-2.3.0.debug.js"

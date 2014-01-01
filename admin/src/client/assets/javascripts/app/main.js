@@ -1,5 +1,3 @@
-"use strict";
-
 requirejs.config({
     paths: {
         "text": "../vendor/requirejs-text/text",
@@ -7,6 +5,7 @@ requirejs.config({
         "jquery": "../vendor/jquery/jquery",
         "bootstrap": "../vendor/bootstrap/bootstrap",
         "durandal":"../vendor/durandal",
+        "async":"../vendor/async/async",
         "plugins" : "../vendor/durandal/plugins",
         "transitions" : "../vendor/durandal/transitions"
     },
@@ -19,6 +18,8 @@ requirejs.config({
 });
 
 define(function(require) {
+    "use strict";
+    
     var app = require("durandal/app"),
         viewLocator = require("durandal/viewLocator"),
         system = require("durandal/system");

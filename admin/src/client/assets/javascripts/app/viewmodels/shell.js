@@ -13,7 +13,12 @@ define(["plugins/router", "durandal/app"], function (router, app) {
                 { route: "", title:"Agents", moduleId: "viewmodels/agent", nav: false },
                 { route: "agent", title:"Agents", moduleId: "viewmodels/agent", nav: true },
                 { route: "transfer", title:"Transfers", moduleId: "viewmodels/transfer", nav: true }
-            ]).buildNavigationModel();
+                ]).buildNavigationModel();
+
+            // var socket = io.connect("http://localhost/socket/v1");
+            // socket.on("test", function (data) {
+            //     console.log(data);
+            // });
             
             return router.activate();
         }
