@@ -19,5 +19,20 @@
   "license": "MIT",
   "engines": {
     "node": ">=0.6"
+  },
+  "jshintConfig" : {
+    "camelcase": true,
+    "curly": true,
+    "forin": true,
+    "freeze": true,
+    "undef": true,
+    "unused": true,
+    "strict": true,
+    "trailing": true,
+    "globals" : {
+      "define" : true,
+      "requirejs" : true,
+      "console" : true
+    }
   }
 }
