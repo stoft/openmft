@@ -9,86 +9,97 @@
 	// Dependencies
 	//-------------
 	var async = require("async");
+	var EventEmitter = require("events").EventEmitter;
+	var util = require("util");
 	var resourceSet = require("./resource_set.js");
 
-	//----------
-	// Functions
-	//----------
-	var load = function(config, resourceNameArray, stateLoadedCallback) {
-		// ResourceSet state
-		var resourceSets = [];
-		// ResourceSet object
-		var object = {
-			// Get a resource set of a certain type
-			getResourceSet: function(type) {
-				// console.log("state.js: " + what + " " + that + " " + this + " " + resourceSets);
-				var rs = null;
-				for (var i = 0; i < resourceSets.length && !rs; i++) {
-					if (resourceSets[i].getResourceType(type) == type) {
-						rs = resourceSets[i];
-					}
-				}
-				return rs;
-			},
-			// Get a resource of a specific type and id
-			addResource: function(type, data) {
-				return this.getResourceSet(type).addResource(data);
-			},
-			// Get a resource of a specific type and id
-			getResource: function(type, id) {
-				return this.getResourceSet(type).getResource(id);
-			},
-			// Get a resource of a specific type and id
-			updateResource: function(type, id, data) {
-				return this.getResourceSet(type).updateResource(id, data);
-			},
-			// Get a resource of a specific type and id
-			deleteResource: function(type, id) {
-				return this.getResourceSet(type).deleteResource(id);
-			},
-			// Get all resources of a specific type
-			getResources: function(type) {
-				return this.getResourceSet(type).listResources();
-			},
-			// Get all resources
-			listResourceSets: function() {
-				return resourceSets;
-			},
-			addResourceSet: function(resourceSet) {
-				resourceSets.push(resourceSet);
+	//----------------------------
+	// Hidden (internal) functions
+	//----------------------------
+	// Get array index of a resource
+	function getResourceSetIndex(state, type) {
+		var index = -1;
+		for (var i = 0; i < state.resourceSets.length && index == -1; i++) {
+			if (state.resourceSets[i].getResourceType() == type) {
+				index = i;
 			}
-		};
+		}
+		return index;
+	}
+	// Get a specific resource set
+	function getResourceSet(state, type) {
+		var result = state.resourceSets[getResourceSetIndex(state, type)];
+		return result;
+	}
 
-		//-------------------------
-		// Read persisted resources
-		//-------------------------
-		async.map(resourceNameArray, function(resourceName, callback) {
-			// Load resource_set asynchronously
-			console.log("[state] Loading resource set: " + resourceName);
-			resourceSet.load(config, resourceName, function(set) {
-				resourceSets.push(set);
-				console.log("[state] Loaded resource set: " + resourceName);
-				// Return result asynchronously
-				callback(false, set);
-			});
-		}, function(err, results) {
-			// results = array of all loaded resource sets
+	//-------------
+	// State object
+	//-------------
+	// Constructor. Note that initialization/loading is performed asynchronously
+	var State = function(options, callback) {
+		// ResourceSet state
+		this.resourceSets = [];
+		this.persistenceDirectory = "/tmp";
+		// Read options
+		if (options && options.persistenceDirectory) {
+			this.persistenceDirectory = options.persistenceDirectory;
+		}
+		// Initialize/load resource sets asynchronously
+		async.map(options.resourceSets, function(resourceSetOptions, callback) {
+			// Load a single resource set, send callback to let async know the results
+			if (! resourceSetOptions.filename) {
+				resourceSetOptions.filename = this.persistenceDirectory + "/" + resourceSetOptions.resourceType + ".json";
+			}
+			return resourceSet.create(resourceSetOptions, callback);
+			// this.resourceSets.push(resourceSet.create(resourceSetOptions, callback));
+		}.bind(this), function(err, results) {
 			if (err) {
-				console.log("[state] BIG ERROR: couldn't load all resource sets: " + JSON.stringify(err));
+				// At least one of the resource sets failed to initialize/load
+				console.log("Failed to initialize/load state: " + err);
+				this.emit("error", "Failed to initialize/load state: " + err);
+				if (callback) {
+					callback(err);
+				}
 			}
 			else {
-				console.log("[state] All resource sets loaded (" + results.length + ")");
+				// All resource sets are now initialized/loaded successfully
+				this.resourceSets = results;
+				console.log("State initialized/loaded (" + this.resourceSets.length + ")");
+				this.emit("initialized", this);
+				if (callback) {
+					callback(null, this);
+				}
 			}
-			stateLoadedCallback(object);
-		});
+		}.bind(this));
+	};
+	// Add eventing to state object
+	util.inherits(State, EventEmitter);
 
-		return object;
+	// Add a resource (asynchronously)
+	State.prototype.addResource = function(type, data, callback) {
+		getResourceSet(this, type).addResource(data, callback);
+	};
+	// Get a resource of a specific type and id
+	State.prototype.getResource = function(type, id) {
+		return this.getResourceSet(type).getResource(id);
+	};
+	// Update a resource (asynchronously)
+	State.prototype.updateResource = function(type, id, data, callback) {
+		this.getResourceSet(type).updateResource(id, data, callback);
+	};
+	// Delete a resource (asynchronously)
+	State.prototype.deleteResource = function(type, id, callback) {
+		this.getResourceSet(type).deleteResource(id, callback);
+	};
+	// Get all resources of a specific type
+	State.prototype.getResources = function(type) {
+		return this.getResourceSet(type).listResources();
 	};
 
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.load = function(config, resourceNameArray, callback) {
-        return load(config, resourceNameArray, callback);
+    module.exports.create = function(options, callback) {
+        return new State(options, callback);
     };
 }());

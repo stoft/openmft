@@ -1,6 +1,6 @@
-﻿"use strict";
-
 define(["plugins/router", "durandal/app"], function (router, app) {
+    "use strict";
+    
     return {
         router: router,
         search: function() {

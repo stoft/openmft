@@ -17,8 +17,6 @@
 	// Initialize and start admin process
 	//-----------------------------------
 	var startServer = function(mimosaConfig, callback) {
-		console.log("Working Directory: " + process.cwd());
-
 		//-------------------------
 		// Read admin configuration
 		//-------------------------
@@ -34,12 +32,25 @@
 		//-------------------------
 		// Load resource state
 		//-------------------------
-		stateModule.load(config, ["agent", "transfer"], function(loadedState) {
-			// Initialize server
-			var server = restInterface.create(config, loadedState);
+		var state = stateModule.create({
+			persistenceDirectory: config.runtimeDir,
+			resourceSets: [
+				{ resourceType: "agent" },
+				{ resourceType: "transfer" }
+			]
+		}, function(err) {
+			if (! err) {
+				console.log("Resources loaded, starting server...");
+				// Initialize server
+				var server = restInterface.create(config, state);
 
-			// Mimosa wants us to invoke the callback
-			callback(server);
+				// Mimosa wants us to invoke the callback
+				callback(server);
+			}
+			else {
+				console.log("Could not initialize/load resources, exiting: " + err);
+				process.exit(1);
+			}
 		});
 	};
 
