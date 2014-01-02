@@ -35,6 +35,12 @@
 			socket.on("list", function(type, callback) {
 				state.getResources(type, callback);
 			});
+			socket.on("create", function(type, data, callback) {
+				state.addResource(type, data, callback);
+			});
+			socket.on("update", function(type, id, data, callback) {
+				state.updateResource(type, id, data, callback);
+			});
 		}.bind(this));
 		// Subscribe to events and publish them to connected sockets
 		this.state.on("add", function(e) {

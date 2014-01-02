@@ -25,7 +25,7 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             // Shallow copy of agents array (to avoid changing the original)
             this.editAgentsLeft(state.agents().slice());
             this.editSelectedSource(-1);
-            $('#myModal').modal();
+            $("#myModal").modal();
         },
         editDialog: function(transfer) {
             this.editTitle("Edit Transfer");
@@ -34,13 +34,49 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             this.editName(transfer.name);
             this.editSources([]);
             this.editTargets([]);
-            // Shallow copy of agents array (to avoid changing the original)
-            this.editAgentsLeft(state.agents().slice());
+            this.editAgentsLeft([]);
+            // Complicated code to sort agents into sources, targets and non-used...
+            for (var i = 0; i < state.agents().length; i++) {
+                var agent = state.agents()[i];
+                var found = false;
+                for (var s = 0; s < transfer.sources.length && !found; s++) {
+                    if (agent.id == transfer.sources[s].agentId) {
+                        found = true;
+                        this.editSources.push(agent);
+                    }
+                }
+                for (var t = 0; t < transfer.targets.length && !found; t++) {
+                    if (agent.id == transfer.targets[t].agentId) {
+                        found = true;
+                        this.editTargets.push(agent);
+                    }
+                }
+                if (! found) {
+                    this.editAgentsLeft.push(agent);
+                }
+            }
             this.editSelectedSource(-1);
-            $('#myModal').modal();
+            $("#myModal").modal();
         },
-        editAddSource: function(something, e) {
-            if (this.editSelectedSource() && this.editSelectedSource() != -1 && this.editSelectedSource() != "") {
+        saveTransfer: function() {
+            var transfer = {
+                id: this.editId(),
+                version: this.editVersion(),
+                name: this.editName(),
+                sources: [],
+                targets: []
+            };
+            for (var i = 0; i < this.editSources().length; i++) {
+                transfer.sources.push({agentId: this.editSources()[i].id});
+            }
+            for (var j = 0; j < this.editTargets().length; j++) {
+                transfer.targets.push({agentId: this.editTargets()[j].id});
+            }
+            this.state.saveTransfer(transfer);
+            $("#myModal").modal("hide");
+        },
+        editAddSource: function() {
+            if (this.editSelectedSource() && this.editSelectedSource() !== -1 && this.editSelectedSource() !== "") {
                 // Add source
                 this.editSources.push(this.editSelectedSource());
                 // Remove from available agents
@@ -49,8 +85,8 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
                 this.editSelectedSource("");
             }
         },
-        editAddTarget: function(something, e) {
-            if (this.editSelectedTarget() && this.editSelectedTarget() != -1 && this.editSelectedTarget() != "") {
+        editAddTarget: function() {
+            if (this.editSelectedTarget() && this.editSelectedTarget() !== -1 && this.editSelectedTarget() !== "") {
                 // Add target
                 this.editTargets.push(this.editSelectedTarget());
                 // Remove from available agents

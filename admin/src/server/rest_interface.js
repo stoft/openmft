@@ -21,8 +21,6 @@
 	function serve(req, res, next) {
 	    var fname = path.normalize("./public" + req.path());
 
-	    //console.log("GET %s maps to %s", req.path(), fname);
-
 	    res.contentType = mime.lookup(fname);
 	    var f = filed(fname);
 	    f.pipe(res);
@@ -36,8 +34,6 @@
 	// Serve static web client index.html
 	function serveIndex(req, res, next) {
 	    var fname = path.normalize("./views/index.html");
-
-	    // console.log("GET %s maps to %s", req.path(), fname);
 
 	    res.contentType = mime.lookup(fname);
 	    var f = filed(fname);
@@ -118,7 +114,7 @@
 		// Serve static content
 		//---------------------
 		server.get(/javascripts\/.*/, serve);
-		server.get(/font\/.*/, serve);
+		server.get(/fonts?\/.*/, serve);
 		server.get(/images\/.*/, serve);
 		server.get(/stylesheets\/.*/, serve);
 		server.get(/x\/.*/, serve);

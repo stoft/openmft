@@ -30,6 +30,7 @@
     "strict": true,
     "trailing": true,
     "globals" : {
+      "$" : true,
       "define" : true,
       "io" : true,
       "requirejs" : true,
