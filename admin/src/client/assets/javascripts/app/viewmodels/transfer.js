@@ -26,6 +26,7 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             this.editAgentsLeft(state.agents().slice());
             this.editSelectedSource(-1);
             $("#myModal").modal();
+            // setTimeout(function() {console.log("focus?");$("#transferName").focus();}, 1000);
         },
         editDialog: function(transfer) {
             this.editTitle("Edit Transfer");
@@ -110,5 +111,19 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             console.log(JSON.stringify(agent));
             return "Hi";
         },
+        compositionComplete: function() { // parameters: view, parent
+            // Focus on transfer name when showing edit dialog
+            $("#myModal").on("shown.bs.modal", function() {
+                $("#transferName").focus()
+            });
+            // Click "Save" on enter when showing edit dialog
+            $("#myModal").keypress(function(e) {
+                if(e.which == 13) {
+                    e.target.blur();
+                    this.saveTransfer();
+                }
+                return true;
+            }.bind(this));
+        }
     };
 });

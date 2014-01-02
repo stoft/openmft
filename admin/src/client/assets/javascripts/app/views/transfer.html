@@ -49,7 +49,7 @@
           <h4 class="modal-title" id="myModalLabel" data-bind="text: editTitle"></h4>
         </div>
         <div class="modal-body">
-          <form role="form">
+          <form role="form" data-bind="enterkey: saveTransfer">
             <div class="form-group">
               <label for="transferName">Transfer Name (Message Type)</label>
               <input type="text" class="form-control" id="transferName" data-bind="value: editName" placeholder="Enter transfer name">
