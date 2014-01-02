@@ -95,6 +95,17 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
                 this.editSelectedTarget("");
             }
         },
+        editRemoveSource: function(agent) {
+            this.editSources.remove(agent);
+            this.editAgentsLeft.push(agent);
+        },
+        editRemoveTarget: function(agent) {
+            this.editTargets.remove(agent);
+            this.editAgentsLeft.push(agent);
+        },
+        removeTransfer: function(transfer) {
+            this.state.removeTransfer(transfer);
+        },
         test: function(agent) {
             console.log(JSON.stringify(agent));
             return "Hi";

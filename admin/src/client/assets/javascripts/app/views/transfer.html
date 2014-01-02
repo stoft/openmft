@@ -2,59 +2,9 @@
   <h2 data-bind="html: displayName"></h2>
 
   <!-- Button trigger modal -->
-<!--   <button class="btn btn-primary" data-toggle="modal" data-target="#myModal"> -->
   <button class="btn btn-primary" data-bind="click: newDialog">
     Create Transfer
   </button>
-
-  <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title" id="myModalLabel" data-bind="text: editTitle"></h4>
-        </div>
-        <div class="modal-body">
-          <form role="form">
-            <div class="form-group">
-              <label for="transferName">Transfer Name (Message Type)</label>
-              <input type="text" class="form-control" id="transferName" data-bind="value: editName" placeholder="Enter transfer name">
-            </div>
-            <div class="form-group">
-              <label>Sources</label>
-              <ul data-bind="foreach: editSources">
-                <li data-bind="text: name"/>
-              </ul>
-              <select class="form-control" 
-                data-bind="options: editAgentsLeft,
-                            optionsCaption: 'Add new source',
-                            optionsText: 'name',
-                            value: editSelectedSource,
-                            event: { change: editAddSource }"/>
-            </div>
-            <div class="form-group">
-              <label>Targets</label>
-              <ul data-bind="foreach: editTargets">
-                <li data-bind="text: name"/>
-              </ul>
-              <select class="form-control" 
-                data-bind="options: editAgentsLeft,
-                            optionsCaption: 'Add new target',
-                            optionsText: 'name',
-                            value: editSelectedTarget,
-                            event: { change: editAddTarget }"/>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" data-bind="click: saveTransfer">Save changes</button>
-        </div>
-      </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-  </div><!-- /.modal -->
-
 
   <table class="table">
     <thead>
@@ -84,10 +34,58 @@
       </td>
       <td>
         <span class="glyphicon glyphicon-pencil" data-bind="click: $parent.editDialog.bind($parent)"></span>
-        <span class="glyphicon glyphicon-remove"></span>
+        <span class="glyphicon glyphicon-remove text-danger" data-bind="click: $parent.removeTransfer.bind($parent)"></span>
       </td>
     </tr>
   </tbody>
 </table>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="myModalLabel" data-bind="text: editTitle"></h4>
+        </div>
+        <div class="modal-body">
+          <form role="form">
+            <div class="form-group">
+              <label for="transferName">Transfer Name (Message Type)</label>
+              <input type="text" class="form-control" id="transferName" data-bind="value: editName" placeholder="Enter transfer name">
+            </div>
+            <div class="form-group">
+              <label>Sources</label>
+              <ul class="list-group" data-bind="foreach: editSources">
+                <li class="list-group-item"><span data-bind="text: name"/><span class="pull-right text-danger glyphicon glyphicon-remove" data-bind="click: $parent.editRemoveSource.bind($parent)"/></li>
+              </ul>
+              <select class="form-control" 
+                data-bind="options: editAgentsLeft,
+                            optionsCaption: 'Add new source',
+                            optionsText: 'name',
+                            value: editSelectedSource,
+                            event: { change: editAddSource }"/>
+            </div>
+            <div class="form-group">
+              <label>Targets</label>
+              <ul class="list-group" data-bind="foreach: editTargets">
+                <li class="list-group-item"><span data-bind="text: name"/><span class="pull-right text-danger glyphicon glyphicon-remove" data-bind="click: $parent.editRemoveTarget.bind($parent)"/></li>
+              </ul>
+              <select class="form-control" 
+                data-bind="options: editAgentsLeft,
+                            optionsCaption: 'Add new target',
+                            optionsText: 'name',
+                            value: editSelectedTarget,
+                            event: { change: editAddTarget }"/>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bind="click: saveTransfer">Save changes</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
 
 </section>

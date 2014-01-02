@@ -35,11 +35,14 @@
 			socket.on("list", function(type, callback) {
 				state.getResources(type, callback);
 			});
-			socket.on("create", function(type, data, callback) {
+			socket.on("add", function(type, data, callback) {
 				state.addResource(type, data, callback);
 			});
 			socket.on("update", function(type, id, data, callback) {
 				state.updateResource(type, id, data, callback);
+			});
+			socket.on("delete", function(type, id, callback) {
+				state.deleteResource(type, id, callback);
 			});
 		}.bind(this));
 		// Subscribe to events and publish them to connected sockets
