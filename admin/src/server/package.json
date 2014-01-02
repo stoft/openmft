@@ -11,6 +11,11 @@
   ],
   "main": "./admin",
   "dependencies" : {
+    "filed": "0.1.x",
+    "mime": "1.2.x",
+    "restify": "2.6.x",
+    "async": "0.2.x",
+    "socket.io": "0.9.x"
   },
   "devDependencies": {
   },
