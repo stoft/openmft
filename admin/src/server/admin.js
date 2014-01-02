@@ -26,7 +26,7 @@
 		var configFile = path.resolve("../../etc/current/config.json");
 		console.log("Reading configuration file: " + configFile);
 		var config = JSON.parse(fs.readFileSync(configFile));
-		if (config.version != expectedVersion) {
+		if (config.configVersion != expectedVersion) {
 			console.log("Mismatch of admin binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
 			process.exit(1);
 		}
