@@ -20,7 +20,7 @@ define(["knockout", "async"], function (ko, async) {
             this.transfers.push(transfer);
         },
         getAgent: function(id) {
-            var result = "Not yet";
+            var result = "No agent with id " + id + " found";
             for (var i = 0; i < this.agents().length; i++) {
                 if (this.agents()[i].id == id) {
                     result = this.agents()[i];

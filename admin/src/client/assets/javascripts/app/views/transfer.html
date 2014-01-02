@@ -23,21 +23,27 @@
             </div>
             <div class="form-group">
               <label>Sources</label>
+              <ul data-bind="foreach: editSources">
+                <li data-bind="text: name"/>
+              </ul>
               <select class="form-control" 
                 data-bind="options: editAgentsLeft,
-                            optionsCaption: 'Choose...',
+                            optionsCaption: 'Add new source',
                             optionsText: 'name',
-                            value: 'name',
+                            value: editSelectedSource,
                             event: { change: editAddSource }"/>
             </div>
             <div class="form-group">
               <label>Targets</label>
-              <select class="form-control">
-              <option value=0>Choose target agent</option>
-              <!-- ko foreach: state.agents -->
-                <option data-bind="attr: {value: id}, text:name+' ('+host+':'+port+')'">X</option>
-                <!-- /ko -->
-              </select>
+              <ul data-bind="foreach: editTargets">
+                <li data-bind="text: name"/>
+              </ul>
+              <select class="form-control" 
+                data-bind="options: editAgentsLeft,
+                            optionsCaption: 'Add new target',
+                            optionsText: 'name',
+                            value: editSelectedTarget,
+                            event: { change: editAddTarget }"/>
             </div>
           </form>
         </div>

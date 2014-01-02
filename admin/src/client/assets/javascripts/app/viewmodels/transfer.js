@@ -7,22 +7,24 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
         state: state,
         // Edit dialog
         editTitle: ko.observable(""),
-        editId: ko.observable(0),
-        editVersion: ko.observable(1),
+        editId: ko.observable(-1),
+        editVersion: ko.observable(-1),
         editName: ko.observable(""),
         editSources: ko.observableArray([]),
         editTargets: ko.observableArray([]),
         editAgentsLeft: ko.observableArray([]),
-        editSelectedSource: ko.observable(""),
+        editSelectedSource: ko.observable(-1),
+        editSelectedTarget: ko.observable(-1),
         newDialog: function() {
             this.editTitle("New Transfer");
-            this.editId(0);
-            this.editVersion(1);
+            this.editId(-1);
+            this.editVersion(-1);
             this.editName("");
             this.editSources([]);
             this.editTargets([]);
-            this.editAgentsLeft(state.agents());
-            this.editSelectedSource("");
+            // Shallow copy of agents array (to avoid changing the original)
+            this.editAgentsLeft(state.agents().slice());
+            this.editSelectedSource(-1);
             $('#myModal').modal();
         },
         editDialog: function(transfer) {
@@ -32,16 +34,29 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             this.editName(transfer.name);
             this.editSources([]);
             this.editTargets([]);
-            this.editAgentsLeft(state.agents());
-            this.editSelectedSource("");
+            // Shallow copy of agents array (to avoid changing the original)
+            this.editAgentsLeft(state.agents().slice());
+            this.editSelectedSource(-1);
             $('#myModal').modal();
         },
-        editAddSource: function(agent, e) {
-            if (editSelectedSource() != "") {
-                console.log("editAddSource: ");
-                console.log(e);
-                this.editSources.push(agent);
-                this.editAgentsLeft.remove(function(a) { return a.id == agent.id; });
+        editAddSource: function(something, e) {
+            if (this.editSelectedSource() && this.editSelectedSource() != -1 && this.editSelectedSource() != "") {
+                // Add source
+                this.editSources.push(this.editSelectedSource());
+                // Remove from available agents
+                this.editAgentsLeft.remove(function(a) { return a.id == this.editSelectedSource().id; }.bind(this));
+                // Reset drop-down
+                this.editSelectedSource("");
+            }
+        },
+        editAddTarget: function(something, e) {
+            if (this.editSelectedTarget() && this.editSelectedTarget() != -1 && this.editSelectedTarget() != "") {
+                // Add target
+                this.editTargets.push(this.editSelectedTarget());
+                // Remove from available agents
+                this.editAgentsLeft.remove(function(a) { return a.id == this.editSelectedTarget().id; }.bind(this));
+                // Reset drop-down
+                this.editSelectedTarget("");
             }
         },
         test: function(agent) {
