@@ -2,7 +2,8 @@
   <h2 data-bind="html: displayName"></h2>
 
   <!-- Button trigger modal -->
-  <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+<!--   <button class="btn btn-primary" data-toggle="modal" data-target="#myModal"> -->
+  <button class="btn btn-primary" data-bind="click: newDialog">
     Create Transfer
   </button>
 
@@ -12,7 +13,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title" id="myModalLabel">New Transfer</h4>
+          <h4 class="modal-title" id="myModalLabel" data-bind="text: editTitle"></h4>
         </div>
         <div class="modal-body">
           <form role="form">
@@ -23,10 +24,11 @@
             <div class="form-group">
               <label>Sources</label>
               <select class="form-control" 
-                data-bind="options: state.agents,
+                data-bind="options: editAgentsLeft,
                             optionsCaption: 'Choose...',
                             optionsText: 'name',
-                            value: 'id'"/>
+                            value: 'name',
+                            event: { change: editAddSource }"/>
             </div>
             <div class="form-group">
               <label>Targets</label>

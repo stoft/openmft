@@ -14,6 +14,11 @@ A simpler way to manage file transfers for enterprises
 
 ## Install and start
 
+### Requirements
+
+> Install node.js (see http://nodejs.org/)
+> Install mimosa `npm install -g mimosa`
+
 ### Download software
 
 > git clone git@github.com:stoft/openmft.git
