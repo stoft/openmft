@@ -83,17 +83,15 @@ Optionally modify configuration parameters to your liking:
 ## Resources
 
 ### Notification Resource
-A notification is defined as:
-```json
-{ 
-    "filename" : "<path>",
-    "id" : "<notificationId>",
-	"source" : "<sourceId>",
-	"target" : "<targetId>",
-	"fileId": "fileId",
-	"transfer": "transferId" 
-}
-```
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+id | int | Agent unique identifier set by the agent, may be subject for reuse after considerable time. | M | M | - | M
+version | int | The current resource version. | M | M | - | M
+source | int | The source agent unique id. | M | M | - | M
+target | int | The target agent unique id. | M | M | - | M
+transfer | int | The transfer unique id. | M | M | - | M
+fileId | int | Agent unique identifier set by the agent. May be subject for reuse after considerable time. | M | M | - | M
+filename | string | The full filename including path of the file. | M | M | - | M
 
 ### Agent Resource
 

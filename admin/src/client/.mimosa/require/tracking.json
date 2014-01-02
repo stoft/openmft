@@ -71,12 +71,9 @@
       "jquery": "../vendor/jquery/jquery",
       "bootstrap": "../vendor/bootstrap/bootstrap",
       "durandal": "../vendor/durandal",
+      "async": "../vendor/async/async",
       "plugins": "../vendor/durandal/plugins",
-      "transitions": "../vendor/durandal/transitions",
-      "socket.io": "../vendor/socket.io",
-      "socket.io-client": "../vendor/socket.io-client",
-      "state": "../app/state",
-      "async": "../vendor/async/async"
+      "transitions": "../vendor/durandal/transitions"
     }
   },
   "requireFiles": [

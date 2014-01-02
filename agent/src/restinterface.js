@@ -23,7 +23,7 @@
 		//------------------------
 		// File Transfer Interface
 		//------------------------
-		server.get('/notification/', function(req,res,next) {
+		server.get('/rest/v1/notifications/', function(req,res,next) {
 			if(req.query.target){
 				res.send(state.getNotifications(req.query.target));
 			}
@@ -32,16 +32,16 @@
 			}
 		});
 		
-		server.get('/notification/:id', function(req,res,next){
+		server.get('/rest/v1/notifications/:id', function(req,res,next){
 			res.send(state.getNotification(req.params.id));
 		});
 		
-		server.get('/file/:id', function(req,res,next){
+		server.get('/rest/v1/files/:id', function(req,res,next){
 			var file = state.getNotification(req.params.id);
 			fs.createReadStream(file.filename).pipe(res);
 		});
 
-		server.del('/notification/:id', function(req,res,next){
+		server.del('/rest/v1/notifications/:id', function(req,res,next){
 			var queueItem = state.getNotification(req.params.id);
 			if(state.deleteNotification(req.params.id)) {
 				fs.unlink(queueItem.filename, function(){

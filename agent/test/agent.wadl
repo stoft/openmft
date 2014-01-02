@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<application xmlns="http://wadl.dev.java.net/2009/02" xmlns:tns="urn:openmft:rest:agent" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<grammars/>
+	<resources base="http://localhost:3301/rest/v1/">
+		<resource path="agents">
+			<method name="GET">
+				<request>
+					<param default="0" name="offset" required="false" style="query"/>
+					<param default="10" name="limit" required="false" style="query"/>
+				</request>
+			</method>
+			<method name="POST"/>
+			<resource path="{agentId}">
+				<param name="agentId" required="true" style="template"/>
+				<method name="GET"/>
+				<method name="PUT"/>
+				<method name="DELETE"/>
+			</resource>
+		</resource>
+		<resource path="transfers">
+			<method name="GET">
+				<request>
+					<param default="0" name="offset" required="false" style="query"/>
+					<param default="10" name="limit" required="false" style="query"/>
+				</request>
+			</method>
+			<method name="POST"/>
+			<resource path="{transferId}">
+				<param name="transferId" required="true" style="template"/>
+				<method name="GET"/>
+				<method name="PUT"/>
+				<method name="DELETE"/>
+			</resource>
+		</resource>
+		<resource path="notifications">
+			<method name="GET">
+				<request>
+					<param default="0" name="offset" required="false" style="query"/>
+					<param default="10" name="limit" required="false" style="query"/>
+				</request>
+			</method>
+			<method name="POST"/>
+			<resource path="{notificationId}">
+				<param name="notificationId" required="true" style="template"/>
+				<method name="GET"/>
+				<method name="DELETE"/>
+			</resource>
+		</resource>
+		<resource path="files">
+			<resource path="{fileId}">
+				<param name="fileId" required="true" style="template"/>
+				<method name="GET"/>
+			</resource>
+		</resource>
+	</resources>
+</application>
