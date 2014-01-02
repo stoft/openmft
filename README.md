@@ -28,6 +28,8 @@ A simpler way to manage file transfers for enterprises
 #### Install
 
 > $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
+> cd $OPENMFT_HOME/admin/src/server
+> npm install
 
 #### Configure
 
