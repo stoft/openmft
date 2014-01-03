@@ -31,4 +31,6 @@ notifications.push(tmpNotification);
 
 // client.processNotifications("localhost", 3301, notifications);
 
-client.getNotifications("localhost", 3301, client.processNotifications);
+// client.getNotifications("localhost", 3301, {id: 1});
+
+client.addSubscription(1, "localhost", 3301);
