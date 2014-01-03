@@ -57,6 +57,14 @@
 				process.exit(1);
 			}
 		});
+
+		// Agent handshake
+		state.on("update", function(e) {
+			// console.log("update");
+			if (e.resourceType == "agent" && e.agent.state == "RUNNING") {
+				console.log("Agent handshake, admin should ask for list of transfers");
+			}
+		});
 	};
 
 	//---------------
