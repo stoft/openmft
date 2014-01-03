@@ -159,3 +159,58 @@ Path | Verb | Description | Parameters | Request | Response
 /rest/v1/transfers/:id | GET | Get transfer details | id | N/A | transfer
 /rest/v1/transfers/:id | PUT | Update transfer details | id | transfer (partial) | transfer
 /rest/v1/transfers/:id | DELETE | Delete transfer | id | N/A | N/A
+
+#### Agent handshake
+
+* *When*: Initiated by agent when started
+* *Why*:
+  * To announce itself to admin (state: RUNNING)
+  * To update agent configuration if necessary
+
+Step | Source | Target | Method | URL | Condition | Description
+--- | --- | --- | --- | --- | --- | ---
+1 | Agent | Admin | GET | /rest/v1/agents/:id | Agent has received an agentId from admin earlier | Agent retrieves information about itself from admin
+2 | Agent | Admin | POST | /rest/v1/agents | Agent retrieved a 404 in step 1 | Agent announces itself to admin to retrieve an id
+3 | Agent | Admin | PUT | /rest/v1/agents/:id |  | Agent announce state RUNNING
+4 | Admin | Agent | GET | /rest/v1/transfers |  | Admin retrieves agent list of transfers
+5 | Admin | Agent | POST | /rest/v1/transfers | Transfer exists in admin but not in agent | Admin creates missing transfers in agent
+6 | Admin | Agent | PUT | /rest/v1/transfers/:id | Admin has a newer version of transfer than agent | Admin updates transfers in agent
+7 | Admin | Agent | DELETE | /rest/v1/transfers/:id | Transfer does not exist in admin but in agent | Admin deletes non-current transfers in agent
+
+#### Admin handshake
+
+* *When*: Initiated by admin when started
+* *Why*:
+  * To update agent configuration if necessary
+
+Step | Source | Target | Method | URL | Condition | Description
+--- | --- | --- | --- | --- | --- | ---
+1 | Admin | Agent | GET | /rest/v1/agents/:id |  | Admin retrieves agent information/status
+2 | Admin | Agent | PUT | /rest/v1/agents/:id | Admin has a newer version of agent | Admin updates agent information
+3 | Admin | Agent | GET | /rest/v1/transfers |  | Admin retrieves agent list of transfers
+4 | Admin | Agent | POST | /rest/v1/transfers | Transfer exists in admin but not in agent | Admin creates missing transfers in agent
+5 | Admin | Agent | PUT | /rest/v1/transfers/:id | Admin has a newer version of transfer than agent | Admin updates transfers in agent
+6 | Admin | Agent | DELETE | /rest/v1/transfers/:id | Transfer does not exist in admin but in agent | Admin deletes non-current transfers in agent
+
+#### Configuration (resource) update
+
+* *When*: Initiated by admin when configuration has been updated
+* *Why*:
+  * To update agent configuration
+
+Step | Source | Target | Method | URL | Condition | Description
+--- | --- | --- | --- | --- | --- | ---
+1 | Admin | Agent | POST | /rest/v1/:type | Resource should be created | Admin updates agent information
+1 | Admin | Agent | PUT | /rest/v1/:type/:id | Resource should be updated | Admin updates agent information
+1 | Admin | Agent | DELETE | /rest/v1/:type/:id | Resource should be deleted | Admin updates agent information
+
+#### Poll agent state
+
+* *When*: Initiated by admin on regular interval
+* *Why*:
+  * To verify agent state (e.g. has the agent been stopped or crashed)
+
+Step | Source | Target | Method | URL | Condition | Description
+--- | --- | --- | --- | --- | --- | ---
+1 | Admin | Agent | GET | /rest/v1/agents/:id | Timer | Admin retrieves agent state/information
+
