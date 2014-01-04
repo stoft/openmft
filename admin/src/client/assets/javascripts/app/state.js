@@ -14,7 +14,6 @@ define(["knockout", "async"], function(ko, async) {
             this.isInitialized(isInitialized);
         },
         sort: function(a) {
-            // a.sort(function(left, right) { return left.name == right.name ? 0 : (left.name < right.name ? -1 : 1) });
             a.sort(function(left, right) { return left.name.localeCompare(right.name); });
         },
         addAgent: function(agent) {

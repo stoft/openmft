@@ -206,7 +206,9 @@
 			}.bind(this)
 			], function(err, result) {
 			// Call original callback
-			callback(err, result);
+			if (callback) {
+				callback(err, result);
+			}
 		}.bind(this));
 };
 	// Remove a resource with a specific id (asynchronously)

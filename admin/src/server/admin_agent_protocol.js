@@ -83,18 +83,25 @@
 	// Event handlers
 	//----------------------------
 	// Trigger: admin has started
-	// Action: Update all agent.state to UNKNOWN
-	// Action: Trigger handleAdminHandshake
+	// Action: Trigger handleAdminHandshake for all agents
 	Protocol.prototype.handleAdminStarted = function() {
 		console.log("handleAdminStarted");
-		// Not implemented
+		this.state.findResources("agent", {}, function iterateAgents(err, agents) {
+			if (! err) {
+				for (var i = 0; i < agents.length; i++) {
+					this.handleAdminHandshake(agents[i]);
+				}
+			}
+		}.bind(this));
 	};
 
 	// Trigger: on admin startup
-	// Action: Trigger handleAgentVerifyState for all agents
-	Protocol.prototype.handleAdminHandshake = function() {
-		console.log("handleAdminHandshake");
-		// Not implemented
+	// Action: Update agent.state to UNKNOWN
+	// Action: Trigger handleAgentVerifyState
+	Protocol.prototype.handleAdminHandshake = function(agent) {
+		console.log("handleAdminHandshake (agentId: " + agent.id + ")");
+		this.handleAgentUpdateState(agent, "UNKNOWN");
+		this.handleAgentVerifyState(agent);
 	};
 
 	// Trigger: An agent has announced itself for the first time
@@ -106,12 +113,12 @@
 
 	// Trigger: An agent has been updated in admin
 	// Trigger: An agent has notified admin about its state
-	// Action: If agent is now running, trigger handleAgentVerifyState
-	// Hmm, should handleAgentVerifyState be used for both admin updates and transfer diffs?
+	// Action: If agent is now running, trigger handleAgentVerifyTransfers
+	// Hmm, should handleAgentVerifyTransfers be used for both admin updates and transfer diffs?
 	Protocol.prototype.handleAgentUpdated = function(agent, old) {
 		console.log("handleAgentUpdated (agentId: " + agent.id + ")");
 		if (agent.state == "RUNNING" && old.state != "RUNNING") {
-			this.handleAgentVerifyState(agent);
+			this.handleAgentVerifyTransfers(agent);
 		}
 	};
 
@@ -121,12 +128,40 @@
 	Protocol.prototype.handleAgentDeleted = function(agent) {
 		console.log("handleAgentDeleted (agentId: " + agent.id + ")");
 		// Not implemented
+		agent.state = "DELETED";
+	};
+
+	// Trigger: on regular intervals
+	// Action: Get agent status
+	Protocol.prototype.handleAgentVerifyState = function(agent) {
+		console.log("handleAgentVerifyState (agentId: " + agent.id + ")");
+		var agentClient = restify.createJsonClient({
+			url: "http://" + agent.host + ":" + agent.port,
+			version: "*"
+		});
+		agentClient.get("/rest/v1/agents/" + agent.id, function onResponse(err, req, res, obj) {
+			if (! err) {
+				if (agent.state !== "RUNNING") {
+					this.handleAgentUpdateState(agent, "RUNNING");
+				}
+			}
+			else {
+				this.handleAgentError(agent);
+			}
+		}.bind(this));
+	};
+
+	// Trigger: on agent status change (admin internally)
+	// Action: Update agent.state
+	Protocol.prototype.handleAgentUpdateState = function(agent, state) {
+		console.log("handleAgentUpdateState (agentId: " + agent.id + ")");
+		this.state.updateResource("agent", agent.id, {id: agent.id, version: agent.version, state: state});
 	};
 
 	// Trigger: on startup of agent and/or admin
 	// Action: Retrieve transfers from admin and agent and pass on to handleTransferCompare
-	Protocol.prototype.handleAgentVerifyState = function(agent) {
-		console.log("handleAgentVerifyState (agentId: " + agent.id + ")");
+	Protocol.prototype.handleAgentVerifyTransfers = function(agent) {
+		console.log("handleAgentVerifyTransfers (agentId: " + agent.id + ")");
 		var agentClient = restify.createJsonClient({
 			url: "http://" + agent.host + ":" + agent.port,
 			version: "*"
@@ -136,7 +171,9 @@
 		async.parallel([
 			function getAgentTransfers(callback) {
 				agentClient.get("/rest/v1/transfers", function onResponse(err, req, res, obj) {
-					agentTransfers = obj.transfers;
+					if (! err) {
+						agentTransfers = obj.transfers;
+					}
 					callback(err);
 				});
 			},
@@ -160,7 +197,9 @@
 	// Action: Update agent status in admin
 	Protocol.prototype.handleAgentError = function(agent) {
 		console.log("handleAgentError (agentId: " + agent.id + ")");
-		// Not implemented
+		if (agent.state !== "ERROR") {
+			this.handleAgentUpdateState(agent, "ERROR");
+		}
 	};
 
 	Protocol.prototype.handleTransferCreated = function(transfer) {
@@ -255,7 +294,7 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.start = function(state) {
-		new Protocol(state);
+	module.exports.create = function(state) {
+		return new Protocol(state);
 	};
 }());

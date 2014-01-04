@@ -47,7 +47,7 @@
 			if (! err) {
 				console.log("Resources loaded, starting server...");
 				// Initialize server
-				agentProtocol.start(state);
+				var protocol = agentProtocol.create(state);
 				var server = restInterface.create(config, state);
 				var io = socketio.listen(server);
 				io.set("log level", 1); // reduce logging
@@ -55,6 +55,7 @@
 
 				// Mimosa wants us to invoke the callback
 				callback(server, io);
+				protocol.handleAdminStarted();
 			}
 			else {
 				console.log("Could not initialize/load resources, exiting: " + err);

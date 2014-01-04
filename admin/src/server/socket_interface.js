@@ -13,6 +13,7 @@
 	// Hidden (internal) functions
 	//----------------------------
 	function handleEvent(socketInterface, e) {
+		// console.log("socket handleEvent: " + e.eventType + " " + e.resourceType)
 		for (var i = 0; i < socketInterface.sockets.length; i++) {
 			socketInterface.sockets[i].emit(e.eventType, e);
 		}
