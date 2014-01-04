@@ -14,7 +14,7 @@ var expectedVersion = 0.1;
 var configFile = process.argv[2] + '/config.json';
 console.log("Reading configuration file: " + configFile);
 var config = JSON.parse(fs.readFileSync(configFile));
-if (config.version != expectedVersion) {
+if (config.configVersion != expectedVersion) {
 	console.log("Mismatch of agent binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
 	process.exit(1);
 }
@@ -33,7 +33,8 @@ var adminClient = restify.createJsonClient({
 	url: "http://" + config.adminHost + ":" + config.adminPort,
 	version: '*'
 });
-adminClient.put("/rest/agent/" + config.id, config, function(err, req, res, obj) {
+config.state = "RUNNING";
+adminClient.put("/rest/v1/agents/" + config.id, config, function(err, req, res, obj) {
 	if (err) {
 		console.log("Could not register with administrator: " + err);
 	}
