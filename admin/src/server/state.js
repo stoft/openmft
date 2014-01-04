@@ -65,18 +65,14 @@
 				this.resourceSets = results;
 				// Subscribe to changes (resubmit them)
 				for (var i = 0; i < this.resourceSets.length; i++) {
-					console.log("Adding subscriptions for " + this.resourceSets[i].getResourceType());
-					this.resourceSets[i].on("add", function(e) {
-						console.log("Resource added: " + JSON.stringify(e));
-						this.emit("add", e);
+					this.resourceSets[i].on("add", function(newResource, oldResource) {
+						this.emit("add", newResource, oldResource);
 					}.bind(this));
-					this.resourceSets[i].on("update", function(e) {
-						console.log("Resource updated: " + JSON.stringify(e));
-						this.emit("update", e);
+					this.resourceSets[i].on("update", function(newResource, oldResource) {
+						this.emit("update", newResource, oldResource);
 					}.bind(this));
-					this.resourceSets[i].on("delete", function(e) {
-						console.log("Resource deleted: " + JSON.stringify(e));
-						this.emit("delete", e);
+					this.resourceSets[i].on("delete", function(id, oldResource) {
+						this.emit("delete", id, oldResource);
 					}.bind(this));
 				}
 				console.log("State initialized/loaded (" + this.resourceSets.length + ")");
@@ -107,8 +103,12 @@
 		getResourceSet(this, type).deleteResource(id, callback);
 	};
 	// Get all resources of a specific type
-	State.prototype.getResources = function(type, callback) {
-		getResourceSet(this, type).listResources(callback);
+	// State.prototype.getResources = function(type, callback) {
+	// 	getResourceSet(this, type).listResources(callback);
+	// };
+	// Get all resources of a specific type
+	State.prototype.findResources = function(type, filter, callback) {
+		getResourceSet(this, type).findResources(filter, callback);
 	};
 
 	//---------------

@@ -17,6 +17,10 @@
 	//----------------------------
 	// Hidden (internal) functions
 	//----------------------------
+	// Copy a resource
+	function deepCopy(resource) {
+		return JSON.parse(JSON.stringify(resource));
+	}
 	// Get array index of a resource
 	function getResourceIndex(resourceSet, id) {
 		var index = -1;
@@ -26,6 +30,47 @@
 			}
 		}
 		return index;
+	}
+	function matchesFilter(object, filter) {
+		var match = true;
+		// console.log("rs.matchesFilter 1 " + JSON.stringify(filter));
+		for (var key in filter) {
+			if (filter.hasOwnProperty(key)) {
+				// console.log("rs.matchesFilter 3 " + key + " " + JSON.stringify(filter[key]));
+				if (Object.prototype.toString.call(filter[key]) === "[object Array]") {
+					// Require the object to contain the filter values
+					// console.log("rs.matchesFilter array " + key + " " + filter[key].length + " ==  " + object[key].length);
+					for (var i = 0; i < filter[key].length && match; i++) {
+						var found = false;
+						for (var j = 0; j < object[key].length && !found; j++) {
+							if (typeof filter[key] == "object") {
+								found = matchesFilter(object[key][j], filter[key][i]);
+							}
+							else {
+								found = filter[key][i] == object[key][j];
+							}
+						}
+						if (! found) {
+							match = false;
+						}
+					}
+				}
+				else if (typeof filter[key] == "string" ||
+					typeof filter[key] == "boolean" ||
+					typeof filter[key] == "number") {
+					// console.log("rs.matchesFilter " + filter[key] + " ==  " + object[key]);
+					if (filter[key] != object[key]) {
+						match = false;
+					}
+				}
+				else {
+					// console.log("rs.matchesFilter unmatched filter type " + (typeof filter[key]) + " " + Object.prototype.toString.call(filter[key]));
+					match = false;
+				}
+			}
+		}
+		// console.log("rs.matchesFilterEnd " + match + " " + JSON.stringify(filter));
+		return match;
 	}
 	// Load a resource set from file (or create an empty file)
 	function loadResourceSet(resourceSet, callback) {
@@ -61,7 +106,7 @@
 				});
 			}
 		});
-	}
+}
 
 	//-------------------
 	// ResourceSet object
@@ -96,8 +141,23 @@
 		}
 	};
 	// Get all resources (asynchronously)
-	ResourceSet.prototype.listResources = function(callback) {
-		callback(null, this.resources);
+	// ResourceSet.prototype.listResources = function(callback) {
+	// 	callback(null, this.resources);
+	// };
+	// Get all resources (asynchronously)
+	ResourceSet.prototype.findResources = function(filter, callback) {
+		async.filter(this.resources, function(resource, callback) {
+			// Exclude if a filter key doesn't match
+			var match = matchesFilter(resource, filter);
+			// for (var key in filter) {
+			//   if (filter.hasOwnProperty(key) && filter.key != resource.key) {
+			//     match = false;
+			//   }
+			// }
+			callback(match);
+		}, function(result) {
+			callback(null, result);
+		});
 	};
 	// Add a resource (asynchronously)
 	ResourceSet.prototype.addResource = function(data, callback) {
@@ -108,7 +168,7 @@
 		// Create resource version
 		data.version = 1;
 		this.resources.push(data);
-		this.persist(data, "add", callback);
+		this.persist(data, "add", null, callback);
 	};
 	// Update a resource (asynchronously)
 	ResourceSet.prototype.updateResource = function(id, data, callback) {
@@ -129,6 +189,8 @@
 			}.bind(this),
 			// Update resource
 			function(resource, callback) {
+				// Take a copy for the emitted event
+				var copy = deepCopy(resource);
 				for (var key in data) {
 					// Do not allow updates of id and version
 					if (key != "id" && key != "version") {
@@ -136,24 +198,25 @@
 					}
 				}
 				resource.version++;
-				callback(null, resource);
+				callback(null, resource, copy);
 			}.bind(this),
 			// Persist changes
-			function(resource, callback) {
-				this.persist(resource, "update", callback);
+			function(resource, copy, callback) {
+				this.persist(resource, "update", copy, callback);
 			}.bind(this)
-		], function(err, result) {
+			], function(err, result) {
 			// Call original callback
 			callback(err, result);
 		}.bind(this));
-	};
+};
 	// Remove a resource with a specific id (asynchronously)
 	ResourceSet.prototype.deleteResource = function(id, callback) {
+		var resource = this.resources[getResourceIndex(this, id)];
 		this.resources.splice(getResourceIndex(this, id), 1);
-		this.persist(id, "delete", callback);
+		this.persist(id, "delete", resource, callback);
 	};
 	// Persist resource set to file (asynchronously)
-	ResourceSet.prototype.persist = function(result, eventName, callback) {
+	ResourceSet.prototype.persist = function(result, eventName, copy, callback) {
 		fs.writeFile(this.filename, JSON.stringify(this.resources), function(err) {
 			if (callback) {
 				if (err) {
@@ -166,7 +229,7 @@
 						resourceType: this.getResourceType()
 					};
 					e[this.getResourceType()] = result;
-					this.emit(eventName, e);
+					this.emit(eventName, e, copy);
 					// Callback
 					callback(null, result);
 				}

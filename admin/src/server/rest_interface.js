@@ -77,13 +77,15 @@
 
 		// List all resources
 		server.get("/rest/v1/:type", function(req, res, next) {
-			state.getResources(singular(req.params.type), function(err, result) {
+			console.log("GET " + req.path());
+			state.findResources(singular(req.params.type), {}, function(err, result) {
 				sendRestResponse(req, res, next, err, result, req.params.type);
 			});
 		});
 
 		// Create resource
 		server.post("/rest/v1/:type", function(req, res, next) {
+			console.log("POST " + req.path());
 			state.addResource(singular(req.params.type), req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, singular(req.params.type));
 			});
@@ -91,6 +93,7 @@
 
 		// Get resource details
 		server.get("/rest/v1/:type/:id", function(req, res, next) {
+			console.log("GET " + req.path());
 			state.getResource(singular(req.params.type), req.params.id, function(err, result) {
 				sendRestResponse(req, res, next, err, result, singular(req.params.type));
 			});
@@ -98,6 +101,7 @@
 
 		// Update resource
 		server.put("/rest/v1/:type/:id", function(req, res, next) {
+			console.log("PUT " + req.path());
 			state.updateResource(singular(req.params.type), req.params.id, req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, singular(req.params.type));
 			});
@@ -105,6 +109,7 @@
 
 		// Delete resource
 		server.del("/rest/v1/:type/:id", function(req, res, next) {
+			console.log("DELETE " + req.path());
 			state.deleteResource(singular(req.params.type), req.params.id, function(err) {
 				sendRestResponse(req, res, next, err, "ok");
 			});

@@ -18,7 +18,7 @@
                     <td data-bind="text: version"></td>
                     <td data-bind="text: host"></td>
 	        		<td data-bind="text: port"></td>
-	        		<td>Not implemented yet</td>
+                    <td data-bind="if: $data.state"><span data-bind="text:state"/></td>
 	        	</tr>
 	        </tbody>
     	</table>
