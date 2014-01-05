@@ -73,9 +73,10 @@
 	// ResourceSet object
 	//-------------------
 	// Constructor. Initializes/Loads resources asynchronously
-	var ResourceSet = function(definition, callback) {
+	var ResourceSet = function(definition, master, callback) {
 		// ResourceSet state
 		this.definition = definition;
+		this.master = master;
 		this.resourceType = definition.resourceType;
 		this.filename = definition.filename;
 		this.resources = [];
@@ -118,10 +119,12 @@
 	ResourceSet.prototype.addResource = function(data, callback) {
 		// ToDo: Validate data
 		// ToDo: Map data to admin structure
-		// Generate unique id
-		data.id = this.idCounter++;
-		// Create resource version
-		data.version = 1;
+		if (this.master) {
+			// Generate unique id
+			data.id = this.idCounter++;
+			// Create resource version
+			data.version = 1;
+		}
 		this.resources.push(data);
 		this.persist(data, "add", null, callback);
 	};
@@ -134,7 +137,7 @@
 			}.bind(this),
 			// Verify version = current
 			function verifyVersion(resource, callback) {
-				if (resource.version != data.version) {
+				if (this.master && resource.version != data.version) {
 					callback(new restify.ConflictError("Not allowed to update " + this.getResourceType() + "/" + id +
 						" (current version: " + resource.version + ") with out-of-date version (" + data.version + ")"));
 				}
@@ -148,13 +151,16 @@
 				var copy = deepCopy(resource);
 				var updateVersion = false;
 				for (var key in data) {
-					// Do not allow updates of id and version
-					if (key != "id" && key != "version" && data.hasOwnProperty(key)) {
-						resource[key] = data[key];
-						updateVersion = updateVersion || this.shouldUpdateVersion(key);
+					// Do not allow updates of id
+					if (key != "id" && data.hasOwnProperty(key)) {
+						// Master will not update version from external sources
+						if (!this.master || key != "version") {
+							resource[key] = data[key];
+							updateVersion = updateVersion || this.shouldUpdateVersion(key);
+						}
 					}
 				}
-				if (updateVersion) {
+				if (this.master && updateVersion) {
 					resource.version++;
 				}
 				callback(null, resource, copy);
@@ -201,7 +207,7 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(definition, callback) {
-		return new ResourceSet(definition, callback);
+	module.exports.create = function(definition, master, callback) {
+		return new ResourceSet(definition, master, callback);
 	};
 }());

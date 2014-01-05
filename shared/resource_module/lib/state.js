@@ -50,7 +50,7 @@
 			if (! resourceSetOptions.filename) {
 				resourceSetOptions.filename = this.persistenceDirectory + "/" + resourceSetOptions.resourceType + ".json";
 			}
-			return resourceSet.create(resourceSetOptions, callback);
+			return resourceSet.create(resourceSetOptions, options.master, callback);
 		}.bind(this), function(err, results) {
 			if (err) {
 				// At least one of the resource sets failed to initialize/load
