@@ -14,7 +14,8 @@
 	// var async = require("async");
 	var socketio = require("socket.io");
 	var restInterface = require("./rest_interface.js");
-	var stateModule = require("./state.js");
+	// var stateModule = require("./state.js");
+	var stateModule = require("resource_module");
 	var socketInterfaceModule = require("./socket_interface.js");
 	var agentProtocol = require("./admin_agent_protocol.js");
 
@@ -39,6 +40,7 @@
 		//-------------------------
 		var state = stateModule.create({
 			persistenceDirectory: config.runtimeDir,
+			master: true,
 			resourceSets: [
 				{
 					resourceType: "agent",

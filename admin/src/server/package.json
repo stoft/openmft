@@ -16,7 +16,8 @@
     "restify": "2.6.x",
     "async": "0.2.x",
     "underscore": "1.5.x",
-    "socket.io": "0.9.x"
+    "socket.io": "0.9.x",
+    "resource_module": "0.1.x"
   },
   "devDependencies": {
   },

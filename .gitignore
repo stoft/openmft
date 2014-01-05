@@ -32,3 +32,4 @@ admin/etc/default/*
 ###############################
 admin/src/server/node_modules
 admin/src/server/public
+shared/resource_module/node_modules

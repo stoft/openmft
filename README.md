@@ -22,6 +22,7 @@ A simpler way to manage file transfers for enterprises
 ### Download software
 
 > git clone git@github.com:stoft/openmft.git
+> npm link $OPENMFT_HOME/shared/resource_module
 
 ### Administrator
 
