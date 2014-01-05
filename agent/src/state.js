@@ -1,3 +1,4 @@
+'use strict';
 //---------------------------------------------------------------------------
 // Provides state for the running agent process
 // Only used internally in the agent instance
@@ -10,7 +11,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function(config) {
+	var create = function() {
 		//-----------------------
 		// Hidden state variables
 		//-----------------------
@@ -19,6 +20,68 @@
 		var fileCounter = 0;
 		var notificationCounter = 0;
 
+		function getNotifications(target) {
+			var results = [];
+			for(var i = 0; i < notifications.length; i++) {
+				if(notifications[i].target == target) {
+					results.push(notifications[i]);
+				}
+			}
+			return results;
+		}
+
+		function getNotification( id ) {
+			return notifications[getNotificationIndex(id)];
+		}
+
+		function deleteNotification( id ) {
+			console.log('Deleting item: ' + id );
+			var notification = getNotification(id);
+			notifications.splice(getNotificationIndex( id ), 1);
+			var doDelete = true;
+			for (var i = 0; i < notifications.length; i++ ) {
+				if (notifications[i].fileId == notification.fileId) {
+					doDelete = false;
+				}
+			}
+			if(doDelete) {
+				files.splice(getFileIndex( notification.fileId ), 1);
+			}
+			return doDelete;
+		}
+
+		function getNotificationIndex(id) {
+			var index = -1;
+			for (var i = 0; i < notifications.length; i++) {
+				if ( notifications[i].id == id) {
+					index = i;
+				}
+			}
+			return index;
+		}
+
+		function getFileIndex(id) {
+			var index = -1;
+			for (var i = 0; i < files.length; i++) {
+				if ( files[i].id == id) {
+					index = i;
+				}
+			}
+			return index;
+		}
+
+		function addFile(path, targets) {
+			var file = { filename : path, id : fileCounter++};
+
+			files.push( file );
+
+			targets.forEach(function(target){
+				var notification = { filename : path, id : notificationCounter++, target : target, fileId: file.id };
+				notifications.push(notification);
+
+			});
+			console.log('Added: ' + path);
+		}
 		//------------------------------------
 		// Return the newly created "instance"
 		//------------------------------------
@@ -26,78 +89,23 @@
 			//--------------
 			// Notifications
 			//--------------
-			getNotifications: function(target) {
-				var results = [];
-				for(var i = 0; i < notifications.length; i++) {
-					if(notifications[i].target == target) {
-						results.push(notifications[i]);
-					}
-				}
-				return results;
-			},
-
-			getNotification: function(id) {
-				return notifications[this.getNotificationIndex(id)];
-			},
-
-			deleteNotification: function( id ) {
-				console.log("Deleting item: " + id );
-				var notification = this.getNotification(id);
-				notifications.splice(this.getNotificationIndex( id ), 1);
-				var doDelete = true;
-				for(var i = 0; i < notifications.length; i++ ) {
-					if(notifications[i].fileId == notification.fileId)
-						doDelete = false;
-				}
-				if(doDelete) {
-					files.splice(this.getFileIndex( notification.fileId ), 1);
-				}
-				return doDelete;
-			},
-
-			getNotificationIndex: function(id) {
-				var index = -1;
-				for (var i = 0; i < notifications.length; i++) {
-					if ( notifications[i].id == id) {
-						index = i;
-					}
-				}
-				return index;
-			},
+			getNotifications: getNotifications,
+			getNotification: getNotification,
+			deleteNotification: deleteNotification,
+			getNotificationIndex: getNotificationIndex,
 
 			//-----------------------------
 			// Files (metadata about files)
 			//-----------------------------
-			getFileIndex: function(id) {
-				var index = -1;
-				for (var i = 0; i < files.length; i++) {
-					if ( files[i].id == id) {
-						index = i;
-					}
-				}
-				return index;
-			},
-
-			addFile: function(path, targets) {
-				var file = { filename : path, id : fileCounter++};
-
-				files.push( file );
-
-				targets.forEach(function(target){
-					var notification = { filename : path, id : notificationCounter++, target : target, fileId: file.id };
-					notifications.push(notification);
-
-				});
-				console.log("Added: " + path);
-			}
-			
+			getFileIndex: getFileIndex,
+			addFile: addFile
 		};
-	}
+	};
 
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(config) {
-        return create(config);
-    }
+    module.exports.create = function() {
+        return create();
+    };
 }());
