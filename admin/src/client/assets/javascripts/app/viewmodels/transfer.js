@@ -23,10 +23,13 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             this.editSources([]);
             this.editTargets([]);
             // Shallow copy of agents array (to avoid changing the original)
-            this.editAgentsLeft(state.agents().slice());
+            var agents = [];
+            for (var i = 0; i < state.agents().length; i++) {
+                agents.push(state.agents()[i]());
+            }
+            this.editAgentsLeft(agents);
             this.editSelectedSource(-1);
             $("#myModal").modal();
-            // setTimeout(function() {console.log("focus?");$("#transferName").focus();}, 1000);
         },
         editDialog: function(transfer) {
             this.editTitle("Edit Transfer");
@@ -38,7 +41,7 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
             this.editAgentsLeft([]);
             // Complicated code to sort agents into sources, targets and non-used...
             for (var i = 0; i < state.agents().length; i++) {
-                var agent = state.agents()[i];
+                var agent = state.agents()[i]();
                 var found = false;
                 for (var s = 0; s < transfer.sources.length && !found; s++) {
                     if (agent.id == transfer.sources[s].agentId) {
@@ -78,6 +81,7 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
         },
         editAddSource: function() {
             if (this.editSelectedSource() && this.editSelectedSource() !== -1 && this.editSelectedSource() !== "") {
+                // console.log(this.editSelectedSource());
                 // Add source
                 this.editSources.push(this.editSelectedSource());
                 // Remove from available agents
@@ -114,7 +118,7 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
         compositionComplete: function() { // parameters: view, parent
             // Focus on transfer name when showing edit dialog
             $("#myModal").on("shown.bs.modal", function() {
-                $("#transferName").focus()
+                $("#transferName").focus();
             });
             // Click "Save" on enter when showing edit dialog
             $("#myModal").keypress(function(e) {

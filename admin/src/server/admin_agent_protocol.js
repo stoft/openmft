@@ -174,8 +174,10 @@
 	// Trigger: on agent status change (admin internally)
 	// Action: Update agent.state
 	Protocol.prototype.handleAgentUpdateState = function(agent, state) {
-		console.log("handleAgentUpdateState (agentId: " + agent.id + ", state: " + state + ")");
-		this.state.updateResource("agent", agent.id, {id: agent.id, version: agent.version, state: state});
+		if (agent.state !== state) {
+			console.log("handleAgentUpdateState (agentId: " + agent.id + ", state: " + state + ")");
+			this.state.updateResource("agent", agent.id, {id: agent.id, version: agent.version, state: state});
+		}
 	};
 
 	// Trigger: on startup of agent and/or admin
@@ -258,67 +260,70 @@
 
 	// Trigger: A transfer has been updated on admin
 	// Action: Add, update and/or delete the transfer on relevant agents
+	// Note: only if version has changed
 	Protocol.prototype.handleTransferUpdated = function(transfer, oldTransfer) {
-		console.log("handleTransferUpdated (transferId: " + transfer.id + ")");
-		// Get array of current agent ids
-		var agentIds = _.uniq(_.union(
-			_.map(transfer.sources, function getAgentId(source) { return source.agentId; }),
-			_.map(transfer.targets, function getAgentId(target) { return target.agentId; })
-		));
-		// Get array of old agent ids
-		var oldAgentIds = _.uniq(_.union(
-			_.map(oldTransfer.sources, function getAgentId(source) { return source.agentId; }),
-			_.map(oldTransfer.targets, function getAgentId(target) { return target.agentId; })
-		));
-		// Which agents to add/update/delete?
-		var addAgentIds = _.difference(agentIds, oldAgentIds);
-		var updateAgentIds = _.intersection(agentIds, oldAgentIds);
-		var deleteAgentIds = _.difference(oldAgentIds, agentIds);
-		// Add transfer to certain agents
-		this.state.findResources("agent", function matchAgents(agent) {
-			return _.some(addAgentIds, function match(id) {
-				return agent.id === id;
-			});
-		}, function tellAgentsAboutTransfer(err, agents) {
-			if (! err) {
-				for (var i = 0; i < agents.length; i++) {
-					this.handleCreateTransferOnAgent(agents[i], transfer);
+		if (transfer.version !== oldTransfer.version) {
+			console.log("handleTransferUpdated (transferId: " + transfer.id + ")");
+			// Get array of current agent ids
+			var agentIds = _.uniq(_.union(
+				_.map(transfer.sources, function getAgentId(source) { return source.agentId; }),
+				_.map(transfer.targets, function getAgentId(target) { return target.agentId; })
+			));
+			// Get array of old agent ids
+			var oldAgentIds = _.uniq(_.union(
+				_.map(oldTransfer.sources, function getAgentId(source) { return source.agentId; }),
+				_.map(oldTransfer.targets, function getAgentId(target) { return target.agentId; })
+			));
+			// Which agents to add/update/delete?
+			var addAgentIds = _.difference(agentIds, oldAgentIds);
+			var updateAgentIds = _.intersection(agentIds, oldAgentIds);
+			var deleteAgentIds = _.difference(oldAgentIds, agentIds);
+			// Add transfer to certain agents
+			this.state.findResources("agent", function matchAgents(agent) {
+				return _.some(addAgentIds, function match(id) {
+					return agent.id === id;
+				});
+			}, function tellAgentsAboutTransfer(err, agents) {
+				if (! err) {
+					for (var i = 0; i < agents.length; i++) {
+						this.handleCreateTransferOnAgent(agents[i], transfer);
+					}
 				}
-			}
-			else {
-				console.log("handleTransferUpdated ERROR: Couldn't find matching agents");
-			}
-		}.bind(this));
-		// Update transfer to certain agents
-		this.state.findResources("agent", function matchAgents(agent) {
-			return _.some(updateAgentIds, function match(id) {
-				return agent.id === id;
-			});
-		}, function tellAgentsAboutTransfer(err, agents) {
-			if (! err) {
-				for (var i = 0; i < agents.length; i++) {
-					this.handleUpdateTransferOnAgent(agents[i], transfer);
+				else {
+					console.log("handleTransferUpdated ERROR: Couldn't find matching agents");
 				}
-			}
-			else {
-				console.log("handleTransferUpdated ERROR: Couldn't find matching agents");
-			}
-		}.bind(this));
-		// Delete transfer to certain agents
-		this.state.findResources("agent", function matchAgents(agent) {
-			return _.some(deleteAgentIds, function match(id) {
-				return agent.id === id;
-			});
-		}, function tellAgentsAboutTransfer(err, agents) {
-			if (! err) {
-				for (var i = 0; i < agents.length; i++) {
-					this.handleDeleteTransferOnAgent(agents[i], transfer);
+			}.bind(this));
+			// Update transfer to certain agents
+			this.state.findResources("agent", function matchAgents(agent) {
+				return _.some(updateAgentIds, function match(id) {
+					return agent.id === id;
+				});
+			}, function tellAgentsAboutTransfer(err, agents) {
+				if (! err) {
+					for (var i = 0; i < agents.length; i++) {
+						this.handleUpdateTransferOnAgent(agents[i], transfer);
+					}
 				}
-			}
-			else {
-				console.log("handleTransferUpdated ERROR: Couldn't find matching agents");
-			}
-		}.bind(this));
+				else {
+					console.log("handleTransferUpdated ERROR: Couldn't find matching agents");
+				}
+			}.bind(this));
+			// Delete transfer to certain agents
+			this.state.findResources("agent", function matchAgents(agent) {
+				return _.some(deleteAgentIds, function match(id) {
+					return agent.id === id;
+				});
+			}, function tellAgentsAboutTransfer(err, agents) {
+				if (! err) {
+					for (var i = 0; i < agents.length; i++) {
+						this.handleDeleteTransferOnAgent(agents[i], transfer);
+					}
+				}
+				else {
+					console.log("handleTransferUpdated ERROR: Couldn't find matching agents");
+				}
+			}.bind(this));
+		}
 	};
 
 	// Trigger: A transfer has been deleted from admin
@@ -357,6 +362,7 @@
 		});
 		agentClient.post("/rest/v1/transfers", transfer, function onResponse(err) {
 			if (! err) {
+				this.handleTransferSynced(agent, transfer);
 				console.log("Created transfer " + transfer.id + " on agent " + agent.id);
 			}
 			else {
@@ -375,6 +381,7 @@
 		});
 		agentClient.put("/rest/v1/transfers/" + transfer.id, transfer, function onResponse(err) {
 			if (! err) {
+				this.handleTransferSynced(agent, transfer);
 				console.log("Updated transfer " + transfer.id + " on agent " + agent.id);
 			}
 			else {
@@ -469,7 +476,31 @@
 	// Action: Update transfer state to SYNCED
 	Protocol.prototype.handleTransferSynced = function(agent, transfer) {
 		console.log("handleTransferSynced (agentId: " + agent.id + ", transferId: " + transfer.id + ")");
-		// Not implemented
+		// Remove any previous sync references for agent
+		var synced = [];
+		if (transfer.synced) {
+			synced = _.filter(transfer.synced, function notAgent(s) {
+				return s.agentId !== agent.id;
+			});
+		}
+		// Add current sync
+		synced.push({agentId: agent.id, version: transfer.version});
+		// Current state
+		var state = "OUT_OF_SYNC";
+		var agentCount = transfer.sources.length + transfer.targets.length;
+		var syncCount = _.countBy(synced, function countSynced(sync) {
+			return sync.version;
+		})[transfer.version];
+		if (agentCount === syncCount) {
+			state = "SYNCHRONIZED";
+		}
+		// Update sync state
+		this.state.updateResource("transfer", transfer.id, {
+			id: transfer.id,
+			version: transfer.version,
+			synced: synced,
+			state: state
+		});
 	};
 
 	//---------------

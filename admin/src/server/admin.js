@@ -103,6 +103,12 @@
 							updatesVersion: true
 						},
 						{
+							name: "synced",
+							type: "array",
+							required: false,
+							updatesVersion: false
+						},
+						{
 							name: "state",
 							type: "string",
 							required: false,
