@@ -40,8 +40,78 @@
 		var state = stateModule.create({
 			persistenceDirectory: config.runtimeDir,
 			resourceSets: [
-				{ resourceType: "agent" },
-				{ resourceType: "transfer" }
+				{
+					resourceType: "agent",
+					properties: [
+						{
+							name: "name",
+							type: "string",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "host",
+							type: "string",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "port",
+							type: "number",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "inboundDir",
+							type: "string",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "outboundDir",
+							type: "string",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "state",
+							type: "string",
+							required: false,
+							updatesVersion: false,
+							default: "UNKNOWN"
+						}
+					]
+				},
+				{
+					resourceType: "transfer",
+					properties: [
+						{
+							name: "name",
+							type: "string",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "sources",
+							type: "array",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "targets",
+							type: "array",
+							required: true,
+							updatesVersion: true
+						},
+						{
+							name: "state",
+							type: "string",
+							required: false,
+							updatesVersion: false,
+							default: "OUT_OF_SYNC"
+						}
+					]
+				}
 			]
 		}, function(err) {
 			if (! err) {

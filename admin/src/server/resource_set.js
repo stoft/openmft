@@ -73,15 +73,13 @@
 	// ResourceSet object
 	//-------------------
 	// Constructor. Initializes/Loads resources asynchronously
-	var ResourceSet = function(options, callback) {
+	var ResourceSet = function(definition, callback) {
 		// ResourceSet state
-		this.resourceType = options.resourceType;
-		this.filename = options.filename;
+		this.definition = definition;
+		this.resourceType = definition.resourceType;
+		this.filename = definition.filename;
 		this.resources = [];
 		this.idCounter = 1;
-		if (options && options.idCounter) {
-			this.idCounter = options.idCounter;
-		}
 		loadResourceSet(this, callback);
 	};
 	// Add eventing
@@ -90,6 +88,12 @@
 	// Return the resource type name
 	ResourceSet.prototype.getResourceType = function() {
 		return this.resourceType;
+	};
+	// Getter for whether a specific property should update a resource version
+	ResourceSet.prototype.shouldUpdateVersion = function(key) {
+		return _.some(this.definition.properties, function contains(p) {
+			return p.name === key && p.updatesVersion === true;
+		});
 	};
 	// Get a resource with a specific id (asynchronously)
 	ResourceSet.prototype.getResource = function(id, callback) {
@@ -125,11 +129,11 @@
 	ResourceSet.prototype.updateResource = function(id, data, callback) {
 		async.waterfall([
 			// Get current version of resource
-			function(callback) {
+			function getResource(callback) {
 				this.getResource(id, callback);
 			}.bind(this),
 			// Verify version = current
-			function(resource, callback) {
+			function verifyVersion(resource, callback) {
 				if (resource.version != data.version) {
 					callback(new restify.ConflictError("Not allowed to update " + this.getResourceType() + "/" + id +
 						" (current version: " + resource.version + ") with out-of-date version (" + data.version + ")"));
@@ -139,29 +143,33 @@
 				}
 			}.bind(this),
 			// Update resource
-			function(resource, callback) {
+			function updateResource(resource, callback) {
 				// Take a copy for the emitted event
 				var copy = deepCopy(resource);
+				var updateVersion = false;
 				for (var key in data) {
 					// Do not allow updates of id and version
-					if (key != "id" && key != "version") {
+					if (key != "id" && key != "version" && data.hasOwnProperty(key)) {
 						resource[key] = data[key];
+						updateVersion = updateVersion || this.shouldUpdateVersion(key);
 					}
 				}
-				resource.version++;
+				if (updateVersion) {
+					resource.version++;
+				}
 				callback(null, resource, copy);
 			}.bind(this),
 			// Persist changes
-			function(resource, copy, callback) {
+			function persistChanges(resource, copy, callback) {
 				this.persist(resource, "update", copy, callback);
 			}.bind(this)
-			], function(err, result) {
+		], function reportResults(err, result) {
 			// Call original callback
 			if (callback) {
 				callback(err, result);
 			}
 		}.bind(this));
-};
+	};
 	// Remove a resource with a specific id (asynchronously)
 	ResourceSet.prototype.deleteResource = function(id, callback) {
 		var resource = this.resources[getResourceIndex(this, id)];
@@ -193,7 +201,7 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(options, callback) {
-		return new ResourceSet(options, callback);
+	module.exports.create = function(definition, callback) {
+		return new ResourceSet(definition, callback);
 	};
 }());
