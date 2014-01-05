@@ -156,6 +156,7 @@ define(["knockout", "async"], function(ko, async) {
     });
     socket.on("update", function(e) {
         console.log("socket: updated: " + e);
+        console.log(e);
         if (e.resourceType === "transfer") {
             state.updateTransfer(e.transfer);
         }

@@ -10,7 +10,7 @@
 	//-------------
 	var restify = require("restify");
 	// var async = require("async");
-	// var _ = require("underscore");
+	var _ = require("underscore");
 
 	//----------------------------
 	// Hidden (internal) functions
@@ -136,6 +136,102 @@
 			}
 			else {
 				this.handleUnrecoverableError("Failed to register agent with administrator");
+			}
+		}.bind(this));
+	};
+
+	// Trigger: A agent has been created on admin
+	// Action: ToDo
+	Protocol.prototype.handleAgentCreated = function(agent) {
+		console.log("handleAgentCreated (agentId: " + agent.id + ")");
+		// Not implemented
+	};
+
+	// Trigger: A agent has been updated on admin
+	// Action: ToDo 
+	Protocol.prototype.handleAgentUpdated = function(agent) {
+		console.log("handleAgentUpdated (agentId: " + agent.id + ")");
+		// Not implemented
+	};
+
+	// Trigger: A agent has been deleted from admin
+	// Action: ToDo
+	Protocol.prototype.handleAgentDeleted = function(agent) {
+		console.log("handleAgentDeleted (agentId: " + agent.id + ")");
+		// Not implemented
+	};
+
+	// Trigger: A transfer has been created on admin
+	// Action: Verify (and possible fetch) that we know of the relevant agents
+	Protocol.prototype.handleTransferCreated = function(transfer) {
+		console.log("handleTransferCreated (transferId: " + transfer.id + ")");
+		this.handleFetchTransferAgents(transfer);
+		// ToDo: act on transfer...
+	};
+
+	// Trigger: A transfer has been updated on admin
+	// Action: Verify (and possible fetch) that we know of the relevant agents
+	Protocol.prototype.handleTransferUpdated = function(transfer) {
+		console.log("handleTransferUpdated (transferId: " + transfer.id + ")");
+		this.handleFetchTransferAgents(transfer);
+		// ToDo: act on transfer...
+	};
+
+	// Trigger: A transfer has been deleted from admin
+	// Action: ToDo
+	Protocol.prototype.handleTransferDeleted = function(transfer) {
+		console.log("handleTransferDeleted (transferId: " + transfer.id + ")");
+		// Not implemented
+		// ToDo: act on transfer...
+	};
+
+	// Trigger: A transfer has been modified
+	// Action: Verify (and possible fetch) that we know of the relevant agents 
+	Protocol.prototype.handleFetchTransferAgents = function(transfer) {
+		console.log("handleFetchTransferAgents (transferId: " + transfer.id + ")");
+		// Get array of agent ids
+		var agentIds = _.uniq(_.union(
+			_.map(transfer.sources, function getAgentId(source) { return source.agentId; }),
+			_.map(transfer.targets, function getAgentId(target) { return target.agentId; })
+		));
+		// Get agents from state (the ones we have)
+		this.adminState.findResources("agent", function matchAgents(agent) {
+			return _.some(agentIds, function match(id) {
+				return agent.id === id;
+			});
+		}, function agentsThatWeHave(err, agents) {
+			if (! err) {
+				// Now, lets find out which ones we don't have knowledge about
+				_.each(agentIds, function inAgentIds(agentId) {
+					if (!_.find(agents, function inAgents(agent) { return agent.id === agentId; })) {
+						this.handleFetchAgent(agentId);
+					}
+				}.bind(this));
+			}
+			else {
+				console.log("handleFetchTransferAgents ERROR: Couldn't find matching agents");
+				console.log(err);
+			}
+		}.bind(this));
+	};
+
+	// Trigger: A transfer has been modified and an agent is currently not known
+	// Action: Get an agent from admin
+	Protocol.prototype.handleFetchAgent = function(agentId) {
+		console.log("handleFetchAgent (agentId: " + agentId + ")");
+		var adminClient = restify.createJsonClient({
+			url: "http://" + this.config.adminHost + ":" + this.config.adminPort,
+			version: "*"
+		});
+		adminClient.get("/rest/v1/agents/" + agentId, function onResponse(err, req, res, obj) {
+			if (! err) {
+				// Yeay, we got the agent, now let's store it internally
+				this.adminState.addResource("agent", obj.agent);
+				console.log("Fetched agent " + agentId + " successfully");
+			}
+			else {
+				console.log("Failed to fetch agent " + agentId);
+				console.log(err);
 			}
 		}.bind(this));
 	};

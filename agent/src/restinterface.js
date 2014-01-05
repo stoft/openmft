@@ -40,6 +40,7 @@
 		//------------------------------
 		var server = restify.createServer();
 		server.use(restify.queryParser());
+		server.use(restify.bodyParser({ mapParams: false }));
 		
 		//------------------------
 		// File Transfer Interface
@@ -87,7 +88,7 @@
 
 		// Create transfer
 		server.post('/rest/v1/transfers', function(req, res, next){
-			console.log('POST ' + req.path());
+			console.log('POST ' + req.path() + " " + JSON.stringify(req.body));
 			adminState.addResource('transfer', req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'transfer');
 			});
