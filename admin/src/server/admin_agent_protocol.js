@@ -86,7 +86,7 @@
 	// Action: Trigger handleAdminHandshake for all agents
 	Protocol.prototype.handleAdminStarted = function() {
 		console.log("handleAdminStarted");
-		this.state.findResources("agent", {}, function iterateAgents(err, agents) {
+		this.state.findResources("agent", null, function iterateAgents(err, agents) {
 			if (! err) {
 				for (var i = 0; i < agents.length; i++) {
 					this.handleAdminHandshake(agents[i]);
@@ -141,8 +141,8 @@
 		});
 		agentClient.get("/rest/v1/agents/" + agent.id, function onResponse(err, req, res, obj) {
 			if (! err) {
-				if (agent.state !== "RUNNING") {
-					this.handleAgentUpdateState(agent, "RUNNING");
+				if (agent.state !== obj.state) {
+					this.handleAgentUpdateState(agent, obj.state);
 				}
 			}
 			else {
@@ -178,7 +178,15 @@
 				});
 			},
 			function getAdminTransfers(callback) {
-				this.state.findResources("transfer", {sources:[{agentId: agent.id}]}, function(err, result) {
+				// Get transfers that have the agent as either a source or a target
+				this.state.findResources("transfer", function filter(transfer) {
+					return _.some(transfer.sources, function match(source) {
+						return source.agentId === agent.id;
+					}) ||
+					_.some(transfer.targets, function match(target) {
+						return target.agentId === agent.id;
+					});
+				}, function(err, result) {
 					adminTransfers = result;
 					callback(err);
 				});

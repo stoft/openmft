@@ -65,15 +65,9 @@
 				this.resourceSets = results;
 				// Subscribe to changes (resubmit them)
 				for (var i = 0; i < this.resourceSets.length; i++) {
-					this.resourceSets[i].on("add", function(newResource, oldResource) {
-						this.emit("add", newResource, oldResource);
-					}.bind(this));
-					this.resourceSets[i].on("update", function(newResource, oldResource) {
-						this.emit("update", newResource, oldResource);
-					}.bind(this));
-					this.resourceSets[i].on("delete", function(id, oldResource) {
-						this.emit("delete", id, oldResource);
-					}.bind(this));
+					this.resourceSets[i].on("add", this.handleResourceAdded.bind(this));
+					this.resourceSets[i].on("update", this.handleResourceUpdated.bind(this));
+					this.resourceSets[i].on("delete", this.handleResourceDeleted.bind(this));
 				}
 				console.log("State initialized/loaded (" + this.resourceSets.length + ")");
 				this.emit("initialized", this);
@@ -86,6 +80,16 @@
 	// Add eventing to state object
 	util.inherits(State, EventEmitter);
 
+	// Emit events
+	State.prototype.handleResourceAdded = function(resource, copy) {
+		this.emit("add", resource, copy);
+	};
+	State.prototype.handleResourceUpdated = function(resource, copy) {
+		this.emit("update", resource, copy);
+	};
+	State.prototype.handleResourceDeleted = function(resource, copy) {
+		this.emit("delete", resource, copy);
+	};
 	// Add a resource (asynchronously)
 	State.prototype.addResource = function(type, data, callback) {
 		getResourceSet(this, type).addResource(data, callback);

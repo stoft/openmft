@@ -11,6 +11,7 @@
 	var fs = require("fs");
 	var EventEmitter = require("events").EventEmitter;
 	var util = require("util");
+	var _ = require("underscore");
 	var async = require("async");
 	var restify = require("restify");
 
@@ -31,47 +32,7 @@
 		}
 		return index;
 	}
-	function matchesFilter(object, filter) {
-		var match = true;
-		// console.log("rs.matchesFilter 1 " + JSON.stringify(filter));
-		for (var key in filter) {
-			if (filter.hasOwnProperty(key)) {
-				// console.log("rs.matchesFilter 3 " + key + " " + JSON.stringify(filter[key]));
-				if (Object.prototype.toString.call(filter[key]) === "[object Array]") {
-					// Require the object to contain the filter values
-					// console.log("rs.matchesFilter array " + key + " " + filter[key].length + " ==  " + object[key].length);
-					for (var i = 0; i < filter[key].length && match; i++) {
-						var found = false;
-						for (var j = 0; j < object[key].length && !found; j++) {
-							if (typeof filter[key] == "object") {
-								found = matchesFilter(object[key][j], filter[key][i]);
-							}
-							else {
-								found = filter[key][i] == object[key][j];
-							}
-						}
-						if (! found) {
-							match = false;
-						}
-					}
-				}
-				else if (typeof filter[key] == "string" ||
-					typeof filter[key] == "boolean" ||
-					typeof filter[key] == "number") {
-					// console.log("rs.matchesFilter " + filter[key] + " ==  " + object[key]);
-					if (filter[key] != object[key]) {
-						match = false;
-					}
-				}
-				else {
-					// console.log("rs.matchesFilter unmatched filter type " + (typeof filter[key]) + " " + Object.prototype.toString.call(filter[key]));
-					match = false;
-				}
-			}
-		}
-		// console.log("rs.matchesFilterEnd " + match + " " + JSON.stringify(filter));
-		return match;
-	}
+
 	// Load a resource set from file (or create an empty file)
 	function loadResourceSet(resourceSet, callback) {
 		console.log("Loading " + resourceSet.getResourceType() + "s: " + resourceSet.filename);
@@ -141,23 +102,13 @@
 		}
 	};
 	// Get all resources (asynchronously)
-	// ResourceSet.prototype.listResources = function(callback) {
-	// 	callback(null, this.resources);
-	// };
-	// Get all resources (asynchronously)
 	ResourceSet.prototype.findResources = function(filter, callback) {
-		async.filter(this.resources, function(resource, callback) {
-			// Exclude if a filter key doesn't match
-			var match = matchesFilter(resource, filter);
-			// for (var key in filter) {
-			//   if (filter.hasOwnProperty(key) && filter.key != resource.key) {
-			//     match = false;
-			//   }
-			// }
-			callback(match);
-		}, function(result) {
-			callback(null, result);
-		});
+		if (filter) {
+			callback(null, _.filter(this.resources, filter));
+		}
+		else {
+			callback(null, this.resources);
+		}
 	};
 	// Add a resource (asynchronously)
 	ResourceSet.prototype.addResource = function(data, callback) {

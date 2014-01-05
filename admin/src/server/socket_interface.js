@@ -34,7 +34,7 @@
 			socket.emit("connect", {some: "connected"});
 			// Subscribe to client requests
 			socket.on("list", function(type, callback) {
-				state.findResources(type, {}, callback);
+				state.findResources(type, null, callback);
 			});
 			socket.on("add", function(type, data, callback) {
 				state.addResource(type, data, callback);

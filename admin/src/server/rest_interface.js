@@ -78,7 +78,7 @@
 		// List all resources
 		server.get("/rest/v1/:type", function(req, res, next) {
 			console.log("GET " + req.path());
-			state.findResources(singular(req.params.type), {}, function(err, result) {
+			state.findResources(singular(req.params.type), null, function(err, result) {
 				sendRestResponse(req, res, next, err, result, req.params.type);
 			});
 		});
