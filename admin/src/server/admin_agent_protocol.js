@@ -141,8 +141,9 @@
 		});
 		agentClient.get("/rest/v1/agents/" + agent.id, function onResponse(err, req, res, obj) {
 			if (! err) {
-				if (agent.state !== obj.state) {
-					this.handleAgentUpdateState(agent, obj.state);
+				if (agent.state !== obj.agent.state) {
+					console.log("Agent " + agent.id + " state changed from " + agent.state + " to " + obj.agent.state);
+					this.handleAgentUpdateState(agent, obj.agent.state);
 				}
 			}
 			else {

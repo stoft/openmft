@@ -1,22 +1,24 @@
+'use strict';
 //-------------
 // Dependencies
 //-------------
 var fs = require('fs');
-var restify = require('restify');
-var resourceModule = require('resource_module')
+// var restify = require('restify');
+var resourceModule = require('resource_module');
 var restinterface = require('./restinterface.js');
 var fileinterface = require('./fileinterface.js');
 var state = require('./state.js');
+var adminProtocolModule = require('./agent_admin_protocol.js');
 
 //-------------------------
 // Read agent configuration
 //-------------------------
 var expectedVersion = 0.1;
 var configFile = process.argv[2] + '/config.json';
-console.log("Reading configuration file: " + configFile);
+console.log('Reading configuration file: ' + configFile);
 var config = JSON.parse(fs.readFileSync(configFile));
 if (config.configVersion != expectedVersion) {
-	console.log("Mismatch of agent binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
+	console.log('Mismatch of agent binary and configuration versions: ' + expectedVersion + ' != ' + config.version + ', exiting');
 	process.exit(1);
 }
 
@@ -24,70 +26,72 @@ if (config.configVersion != expectedVersion) {
 // Initialize and start agent process
 //-----------------------------------
 var adminState = resourceModule.create({
-	persistenceDirectory: config.runtimeDir + "/adminState",
+	persistenceDirectory: config.runtimeDir + '/adminState',
 	master: false,
 	resourceSets: [
 		{
-			resourceType: "agent",
+			resourceType: 'agent',
 			properties: [
 				{
-					name: "name",
-					type: "string"
+					name: 'name',
+					type: 'string'
 				},
 				{
-					name: "host",
-					type: "string"
+					name: 'host',
+					type: 'string'
 				},
 				{
-					name: "port",
-					type: "number"
+					name: 'port',
+					type: 'number'
 				},
 				{
-					name: "inboundDir",
-					type: "string"
+					name: 'inboundDir',
+					type: 'string'
 				},
 				{
-					name: "outboundDir",
-					type: "string"
+					name: 'outboundDir',
+					type: 'string'
 				},
 				{
-					name: "state",
-					type: "string"
+					name: 'state',
+					type: 'string'
 				}
 			]
 		},
 		{
-			resourceType: "transfer",
+			resourceType: 'transfer',
 			properties: [
 				{
-					name: "name",
-					type: "string"
+					name: 'name',
+					type: 'string'
 				},
 				{
-					name: "sources",
-					type: "array"
+					name: 'sources',
+					type: 'array'
 				},
 				{
-					name: "targets",
-					type: "array"
+					name: 'targets',
+					type: 'array'
 				},
 				{
-					name: "state",
-					type: "string"
+					name: 'state',
+					type: 'string'
 				}
 			]
 		}
 	]
 }, function(err) {
 	if (! err) {
-		console.log("Admin resources loaded, starting agent...");
+		console.log('Admin resources loaded, starting agent...');
 		// Initialize server
 		var st = state.create(config);
-		var file = fileinterface.create(st, config);
-		var rest = restinterface.create(st, config);
+		fileinterface.create(st, config);
+		restinterface.create(st, adminState, config.port);
+		var adminProtocol = adminProtocolModule.create(config, st, adminState);
+		adminProtocol.handleAgentStarted();
 	}
 	else {
-		console.log("Could not initialize/load resources, exiting: " + err);
+		console.log('Could not initialize/load resources, exiting: ' + err);
 		process.exit(1);
 	}
 });
@@ -96,15 +100,15 @@ var adminState = resourceModule.create({
 // Announce ourselves to admin (if running, e.g. ignore errors)
 //-------------------------------------------------------------
 // var adminClient = restify.createJsonClient({
-// 	url: "http://" + config.adminHost + ":" + config.adminPort,
+// 	url: 'http://' + config.adminHost + ':' + config.adminPort,
 // 	version: '*'
 // });
-// config.state = "RUNNING";
-// adminClient.put("/rest/v1/agents/" + config.id, config, function(err, req, res, obj) {
+// config.state = 'RUNNING';
+// adminClient.put('/rest/v1/agents/' + config.id, config, function(err, req, res, obj) {
 // 	if (err) {
-// 		console.log("Could not register with administrator: " + err);
+// 		console.log('Could not register with administrator: ' + err);
 // 	}
 // 	else {
-// 		console.log("Successfully registered with administrator")
+// 		console.log('Successfully registered with administrator')
 // 	}
 // });

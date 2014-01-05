@@ -4,16 +4,37 @@
 // and the the rest of the OpenMFT network
 //---------------------------------------------------------------------------
 (function() {
+	'use strict';
 	//-------------
 	// Dependencies
 	//-------------
 	var restify = require('restify');
 	var fs = require('fs');
 
+	//-----------------------------------
+	// Internal functions
+	//-----------------------------------
+
+	function sendRestResponse(req, res, next, err, response, wrapperName) {
+		if (! err) {
+			var r = response;
+			// For methods that return a resource, wrap with singular/plural name of resource type
+			if (wrapperName) {
+				r = {};
+				r[wrapperName] = response;
+			}
+			res.send(r);
+			return next();
+		}
+		else {
+			return next(err);
+		}
+	}
+
 	//------------
 	// Constructor
 	//------------	
-	var create = function(state, config) {
+	var create = function(state, adminState, port) {
 		//------------------------------
 		// Initialize the REST interface
 		//------------------------------
@@ -23,7 +44,7 @@
 		//------------------------
 		// File Transfer Interface
 		//------------------------
-		server.get('/rest/v1/notifications/', function(req,res,next) {
+		server.get('/rest/v1/notifications/', function(req, res) {
 			if(req.query.target){
 				res.send(state.getNotifications(req.query.target));
 			}
@@ -32,20 +53,20 @@
 			}
 		});
 		
-		server.get('/rest/v1/notifications/:id', function(req,res,next){
+		server.get('/rest/v1/notifications/:id', function(req, res){
 			res.send(state.getNotification(req.params.id));
 		});
 		
-		server.get('/rest/v1/files/:id', function(req,res,next){
+		server.get('/rest/v1/files/:id', function(req, res){
 			var file = state.getNotification(req.params.id);
 			fs.createReadStream(file.filename).pipe(res);
 		});
 
-		server.del('/rest/v1/notifications/:id', function(req,res,next){
+		server.del('/rest/v1/notifications/:id', function(req, res){
 			var queueItem = state.getNotification(req.params.id);
 			if(state.deleteNotification(req.params.id)) {
 				fs.unlink(queueItem.filename, function(){
-					res.send("ok");
+					res.send('ok');
 				});
 			}
 			else {
@@ -56,49 +77,95 @@
 		// Administrator Interface
 		//------------------------
 
-		// Retrieve agent status
-		server.get('/status', function(req,res,next){
-			res.send({
-				id : config.id,
-				version : config.version,
-				state : "RUNNING"
-			}); 
-		});
-		
-		// Pause or start agent
-		server.post('/status', function(req,res,next){
-			res.send("Not implemented"); 
+		// Get transfers
+		server.get('/rest/v1/transfers', function(req, res, next){
+			console.log('GET ' + req.path());
+			adminState.findResources('transfer', null, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'transfers');
+			});
 		});
 
-		// Get agent configuration
-		server.get('/configuration', function(req,res,next){
-			res.send("Not implemented"); 
+		// Create transfer
+		server.post('/rest/v1/transfers', function(req, res, next){
+			console.log('POST ' + req.path());
+			adminState.addResource('transfer', req.body, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'transfer');
+			});
 		});
 
-		// Update agent configuration
-		server.post('/configuration', function(req,res,next){
-			res.send("Not implemented"); 
+		// Get transfer
+		server.get('/rest/v1/transfers/:id', function(req, res, next){
+			console.log('GET ' + req.path());
+			adminState.getResource('transfer', req.params.id, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'transfer');
+			});
 		});
 
-		// Get transfers (and status of the same)
-		server.get('/transfer', function(req,res,next){
-			res.send("Not implemented"); 
+		// Update transfer
+		server.put('/rest/v1/transfers/:id', function(req, res, next){
+			console.log('PUT ' + req.path());
+			adminState.updateResource('transfer', req.params.id, req.body, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'transfer');
+			});
 		});
 
-		// Update transfer status (pause or resume)
-		server.post('/transfer/:id', function(req,res,next){
-			res.send("Not implemented"); 
+		// Delete transfer
+		server.del('/rest/v1/transfers/:id', function(req, res, next){
+			console.log('DELETE ' + req.path());
+			adminState.deleteResource('transfer', req.params.id, function(err) {
+				sendRestResponse(req, res, next, err, 'ok');
+			});
+		});
+
+		// Get agents
+		server.get('/rest/v1/agents', function(req, res, next){
+			console.log('GET ' + req.path());
+			adminState.findResources('agent', null, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'agents');
+			});
+		});
+
+		// Create agent
+		server.post('/rest/v1/agents', function(req, res, next){
+			console.log('POST ' + req.path());
+			adminState.addResource('agent', req.body, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'agent');
+			});
+		});
+
+		// Get agent
+		server.get('/rest/v1/agents/:id', function(req, res, next){
+			console.log('GET ' + req.path());
+			adminState.getResource('agent', req.params.id, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'agent');
+			});
+		});
+
+		// Update agent
+		server.put('/rest/v1/agents/:id', function(req, res, next){
+			console.log('PUT ' + req.path());
+			adminState.updateResource('agent', req.params.id, req.body, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'agent');
+			});
+		});
+
+		// Delete agent
+		server.del('/rest/v1/agents/:id', function(req, res, next){
+			console.log('DELETE ' + req.path());
+			adminState.deleteResource('agent', req.params.id, function(err) {
+				sendRestResponse(req, res, next, err, 'ok');
+			});
 		});
 
 		//-------------------------
 		// Start the REST interface
 		//-------------------------
-		server.listen(config.port, function() {
-		  console.log('%s listening at %s', server.name, server.url);
+		server.listen(port, function() {
+		  console.log('Agent listening at %s', server.url);
 		});
 
 		//------------------------------------
-		// Return the newly created "instance"
+		// Return the newly created 'instance'
 		//------------------------------------
 		return {};
 	};
@@ -106,7 +173,7 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(state, config) {
-        return create(state, config);
-    }
+    module.exports.create = function(state, adminState, port) {
+        return create(state, adminState, port);
+    };
 }());
