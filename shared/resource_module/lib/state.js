@@ -11,6 +11,7 @@
 	var async = require("async");
 	var EventEmitter = require("events").EventEmitter;
 	var util = require("util");
+	var fs = require("fs");
 	var resourceSet = require("./resource_set.js");
 
 	//----------------------------
@@ -43,6 +44,10 @@
 		// Read options
 		if (options && options.persistenceDirectory) {
 			this.persistenceDirectory = options.persistenceDirectory;
+		}
+		// Create directory if it doesn't exist
+		if (! fs.existsSync(this.persistenceDirectory)) {
+			fs.mkdirSync(this.persistenceDirectory);
 		}
 		// Initialize/load resource sets asynchronously
 		async.map(options.resourceSets, function(resourceSetOptions, callback) {

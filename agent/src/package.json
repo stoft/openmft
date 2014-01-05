@@ -1,0 +1,41 @@
+{
+  "name": "openmft-agent",
+  "version": "0.1.0",
+  "author": "Rasmus Larsson <rasmus.larsson@gmail.com>",
+  "description": "OpenMFT Agent",
+  "contributors": [ 
+    {
+      "name": "Erik Larsson",
+      "email": "erik.larsson@musiker.nu"
+    } 
+  ],
+  "main": "./agent",
+  "dependencies" : {
+    "restify": "2.6.x",
+    "async": "0.2.x",
+    "underscore": "1.5.x",
+    "chokidar": "0.8.x",
+    "resource_module": "0.1.x"
+  },
+  "devDependencies": {
+  },
+  "bundledDependencies": [
+  ],  
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.6"
+  },
+  "jshintConfig" : {
+    "node": true,
+    "camelcase": true,
+    "curly": true,
+    "forin": true,
+    "freeze": true,
+    "undef": true,
+    "unused": true,
+    "strict": true,
+    "trailing": true,
+    "globals": {
+    }
+  }
+}

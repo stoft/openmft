@@ -22,7 +22,6 @@ A simpler way to manage file transfers for enterprises
 ### Download software
 
 > git clone git@github.com:stoft/openmft.git
-> npm link $OPENMFT_HOME/shared/resource_module
 
 ### Administrator
 
@@ -30,6 +29,7 @@ A simpler way to manage file transfers for enterprises
 
 > $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
 > cd $OPENMFT_HOME/admin/src/server
+> npm link $OPENMFT_HOME/shared/resource_module
 > npm install
 
 #### Configure
@@ -60,6 +60,9 @@ Optionally modify configuration parameters to your liking:
 #### Install
 
 > $OPENMFT_HOME/agent/bin/install.sh _AGENTNAME_
+> cd $OPENMFT_HOME/agent/src
+> npm link $OPENMFT_HOME/shared/resource_module
+> npm install
 
 #### Configure
 

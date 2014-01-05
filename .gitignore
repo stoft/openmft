@@ -30,6 +30,5 @@ admin/etc/default/*
 ###############################
 # Ignore built/generated files
 ###############################
-admin/src/server/node_modules
+node_modules
 admin/src/server/public
-shared/resource_module/node_modules

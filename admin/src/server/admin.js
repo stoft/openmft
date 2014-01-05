@@ -10,12 +10,9 @@
 	//-------------
 	var path = require("path");
 	var fs = require("fs");
-	// var restify = require("restify");
-	// var async = require("async");
 	var socketio = require("socket.io");
 	var restInterface = require("./rest_interface.js");
-	// var stateModule = require("./state.js");
-	var stateModule = require("resource_module");
+	var resourceModule = require("resource_module");
 	var socketInterfaceModule = require("./socket_interface.js");
 	var agentProtocol = require("./admin_agent_protocol.js");
 
@@ -38,7 +35,7 @@
 		//-------------------------
 		// Load resource state
 		//-------------------------
-		var state = stateModule.create({
+		var state = resourceModule.create({
 			persistenceDirectory: config.runtimeDir,
 			master: true,
 			resourceSets: [
