@@ -7,6 +7,8 @@
 // Dependencies
 //-------------
 var restify = require('restify');
+var restApi = require('../src/restapi.js');
+
 
 //------------------------------
 // Initialize the REST interface
