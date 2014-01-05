@@ -9,6 +9,7 @@ var restinterface = require('./restinterface.js');
 var fileinterface = require('./fileinterface.js');
 var state = require('./state.js');
 var adminProtocolModule = require('./agent_admin_protocol.js');
+var client = require('./client.js');
 
 //-------------------------
 // Read agent configuration
@@ -84,9 +85,10 @@ var adminState = resourceModule.create({
 	if (! err) {
 		console.log('Admin resources loaded, starting agent...');
 		// Initialize server
-		var st = state.create(config);
+		var st = state.create();
 		fileinterface.create(st, config);
 		restinterface.create(st, adminState, config.port);
+		client.create(config);
 		var adminProtocol = adminProtocolModule.create(config, st, adminState);
 		adminProtocol.handleAgentStarted();
 	}
