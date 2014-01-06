@@ -16,26 +16,26 @@ A simpler way to manage file transfers for enterprises
 
 ### Requirements
 
-> Install node.js (see http://nodejs.org/)
-> Install mimosa `npm install -g mimosa`
+* Install node.js (see http://nodejs.org/)
+* Install mimosa `npm install -g mimosa`
 
 ### Download software
 
-> git clone git@github.com:stoft/openmft.git
+* git clone git@github.com:stoft/openmft.git
 
 ### Administrator
 
 #### Install
 
-> $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
-> cd $OPENMFT_HOME/admin/src/server
-> npm link $OPENMFT_HOME/shared/resource_module
-> npm install
+* $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
+* cd $OPENMFT_HOME/admin/src/server
+* npm link $OPENMFT_HOME/shared/resource_module
+* npm install
 
 #### Configure
 
 Optionally modify configuration parameters to your liking:
-> $OPENMFT_HOME/admin/etc/_DOMAIN_/config.json
+* $OPENMFT_HOME/admin/etc/_DOMAIN_/config.json
 
 ```json
 {
@@ -49,25 +49,25 @@ Optionally modify configuration parameters to your liking:
 }
 ```
 
-> $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
+* $OPENMFT_HOME/admin/bin/install.sh _DOMAIN_
 
 #### Start
 
-> $OPENMFT_HOME/admin/bin/start.sh _DOMAIN_
+* $OPENMFT_HOME/admin/bin/start.sh _DOMAIN_
 
 ### Agent
 
 #### Install
 
-> $OPENMFT_HOME/agent/bin/install.sh _AGENTNAME_
-> cd $OPENMFT_HOME/agent/src
-> npm link $OPENMFT_HOME/shared/resource_module
-> npm install
+* $OPENMFT_HOME/agent/bin/install.sh _AGENTNAME_
+* cd $OPENMFT_HOME/agent/src
+* npm link $OPENMFT_HOME/shared/resource_module
+* npm install
 
 #### Configure
 
 Optionally modify configuration parameters to your liking:
-> $OPENMFT_HOME/agent/etc/_AGENTNAME_/config.json
+* $OPENMFT_HOME/agent/etc/_AGENTNAME_/config.json
 
 ```json
 {
@@ -88,7 +88,7 @@ Optionally modify configuration parameters to your liking:
 
 #### Start
 
-> $OPENMFT_HOME/agent/bin/start.sh _agent_name_
+* $OPENMFT_HOME/agent/bin/start.sh _agent_name_
 
 
 ## Resources
