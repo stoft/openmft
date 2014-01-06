@@ -6,10 +6,14 @@ requirejs.config({
         "bootstrap": "../vendor/bootstrap/bootstrap",
         "durandal":"../vendor/durandal",
         "async":"../vendor/async/async",
+        "underscore":"../vendor/underscore/underscore",
         "plugins" : "../vendor/durandal/plugins",
         "transitions" : "../vendor/durandal/transitions"
     },
     shim: {
+        "underscore": {
+          exports: '_'
+        },
         "bootstrap": {
             deps: ["jquery"],
             exports: "jQuery"

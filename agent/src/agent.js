@@ -19,7 +19,7 @@ var configFile = process.argv[2] + '/config.json';
 console.log('Reading configuration file: ' + configFile);
 var config = JSON.parse(fs.readFileSync(configFile));
 if (config.configVersion != expectedVersion) {
-	console.log('Mismatch of agent binary and configuration versions: ' + expectedVersion + ' != ' + config.version + ', exiting');
+	console.log('Mismatch of agent binary and configuration versions: ' + expectedVersion + ' != ' + config.configVersion + ', exiting');
 	process.exit(1);
 }
 

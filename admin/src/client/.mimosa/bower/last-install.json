@@ -9,6 +9,7 @@
     "async": "0.2.x",
     "bootstrap": "3.0.x",
     "font-awesome": "3.2.1",
+    "underscore": "1.5.x",
     "durandal": "2.0.1"
   }
 }

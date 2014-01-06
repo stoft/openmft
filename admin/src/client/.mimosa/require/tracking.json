@@ -1,6 +1,9 @@
 {
   "shims": {
     "/javascripts/app/main.js": {
+      "underscore": {
+        "exports": "_"
+      },
       "bootstrap": {
         "deps": [
           "jquery"
@@ -17,7 +20,8 @@
     ],
     "/javascripts/app/state.js": [
       "knockout",
-      "async"
+      "async",
+      "underscore"
     ],
     "/javascripts/app/viewmodels/agent.js": [
       "plugins/http",
@@ -46,6 +50,7 @@
       "bootstrap": "../vendor/bootstrap/bootstrap",
       "durandal": "../vendor/durandal",
       "async": "../vendor/async/async",
+      "underscore": "../vendor/underscore/underscore",
       "plugins": "../vendor/durandal/plugins",
       "transitions": "../vendor/durandal/transitions"
     }
@@ -63,6 +68,9 @@
           "jquery"
         ],
         "exports": "jQuery"
+      },
+      "underscore": {
+        "exports": "_"
       }
     },
     "paths": {
@@ -73,7 +81,8 @@
       "durandal": "../vendor/durandal",
       "async": "../vendor/async/async",
       "plugins": "../vendor/durandal/plugins",
-      "transitions": "../vendor/durandal/transitions"
+      "transitions": "../vendor/durandal/transitions",
+      "underscore": "../vendor/underscore/underscore"
     }
   },
   "requireFiles": [

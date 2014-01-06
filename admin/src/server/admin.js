@@ -28,7 +28,7 @@
 		console.log("Reading configuration file: " + configFile);
 		var config = JSON.parse(fs.readFileSync(configFile));
 		if (config.configVersion != expectedVersion) {
-			console.log("Mismatch of admin binary and configuration versions: " + expectedVersion + " != " + config.version + ", exiting");
+			console.log("Mismatch of admin binary and configuration versions: " + expectedVersion + " != " + config.configVersion + ", exiting");
 			process.exit(1);
 		}
 

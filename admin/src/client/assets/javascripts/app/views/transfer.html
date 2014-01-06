@@ -25,12 +25,16 @@
       <td data-bind="text: version"></td>
       <td data-bind="foreach: sources">
         <!-- ko with: $root.state.getAgent(agentId) -->
-        <span data-bind="text: host"/> <span data-bind="text: name"/>/<span data-bind="text: $parents[1].name"/><br/>
+        <span data-bind="css: { 'text-danger': !$root.state.isSynchronized($parents[1], $data) }">
+          <span data-bind="text: host"/> <span data-bind="text: name"/>/<span data-bind="text: $parents[1].name"/>
+        </span><br/>
         <!-- /ko -->
       </td>
       <td data-bind="foreach: targets">
         <!-- ko with: $root.state.getAgent(agentId) -->
-        <span data-bind="text: host"/> <span data-bind="text: name"/>/<span data-bind="text: $parents[1].name"/><br/>
+        <span data-bind="css: { 'text-danger': !$root.state.isSynchronized($parents[1], $data) }">
+          <span data-bind="text: host"/> <span data-bind="text: name"/>/<span data-bind="text: $parents[1].name"/>
+        </span><br/>
         <!-- /ko -->
       </td>
       <td data-bind="if: $data.state"><span data-bind="text:state"/></td>

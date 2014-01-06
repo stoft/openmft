@@ -1,6 +1,5 @@
-define(["knockout", "async"], function(ko, async) {
+define(["knockout", "async", "underscore"], function(ko, async, _) {
 	"use strict";
-
 	// Set up socket connection to server
 	var socket = io.connect("/socket/v1");
 
@@ -112,6 +111,11 @@ define(["knockout", "async"], function(ko, async) {
 				}
 			}
 			return result;
+		},
+		isSynchronized: function(transfer, agent) {
+			return _.some(transfer.synced, function isSynced(sync) {
+				return agent.id === sync.agentId && transfer.version === sync.version;
+			});
 		}
 	};
 
