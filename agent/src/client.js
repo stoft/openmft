@@ -36,7 +36,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function(config, adminState) {
+	var create = function(config, agentState, adminState) {
 
 		//-----------------------
 		// Hidden state variables
@@ -68,6 +68,37 @@
 		});
 		adminState.transfer.on('delete', function onDelete(resource, old) {
 			transferDeleted(old);
+		});
+		agentState.file.on('add', function onAdd(resource) {
+			var file = resource.file;
+			console.log('File '+file.id+' added, lets create notifications');
+			adminState.transfer.getResource(file.transferId, function getTransfer(err, transfer) {
+				if (err) {
+					throw new Error('Couldnt get transfer ' + file.transferId);
+				}
+				_.each(transfer.targets, function createNotification(target) {
+					console.log('Creating notification for ' + target.agentId);
+					agentState.notification.addResource({
+						fileId: file.id,
+						filename : file.path,
+						source: config.id,
+						target : target.agentId,
+						transfer : transfer.id
+					});
+				});
+			});
+		});
+		agentState.notification.on('delete', function onDelete(id, notification) {
+			console.log('Notification deleted, lets see if the file should be deleted');
+			agentState.notification.findResources(function sameFile(n) {
+				return notification.fileId === n.fileId;
+			}, function (err, notifications) {
+				if (! err && notifications.length === 0) {
+					console.log('No notifications left for the file, lets delete it');
+					agentState.file.deleteResource(notification.fileId);
+					fs.unlink(notification.filename);
+				}
+			});
 		});
 
 		//------------
@@ -233,13 +264,13 @@
 			var client = createJsonClient(host, port);
 			console.log('client.getNotifications ' + host + ' ' + port);
 
-			client.get(restApi.NOTIFICATIONS + '?target=' + config.id, function(err, req, res, notifications) {
+			client.get(restApi.NOTIFICATIONS + '?target=' + config.id, function(err, req, res, obj) {
 				if (err) {
 					console.log('Could not get notifications: ' + JSON.stringify(err));
 				}
 				else {
-					console.log('Got notifications: %d', Object.keys(notifications).length);
-					processNotifications(host, port, notifications);
+					console.log('Got notifications: %d', Object.keys(obj.notifications).length);
+					processNotifications(host, port, obj.notifications);
 				}
 			});
 		}
@@ -263,8 +294,8 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(config, adminState) {
+	module.exports.create = function(config, agentState, adminState) {
 		//TODO subscribe to each source.
-		return create(config, adminState);
+		return create(config, agentState, adminState);
 	};
 }());

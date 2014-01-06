@@ -171,19 +171,23 @@
 	// Persist resource set to file (asynchronously)
 	ResourceSet.prototype.persist = function(result, eventName, copy, callback) {
 		fs.writeFile(this.filename, JSON.stringify(this.resources), function(err) {
-			if (callback) {
-				if (err) {
+			if (err) {
+				if (callback) {
 					callback(err, "Could not write resource set state to disk");
 				}
 				else {
-					// Emit an event for the change
-					var e = {
-						eventType: eventName,
-						resourceType: this.getResourceType()
-					};
-					e[this.getResourceType()] = result;
-					this.emit(eventName, e, copy);
-					// Callback
+					throw new Error("Could not write resource set state to disk");
+				}
+			}
+			else {
+				// Emit an event for the change
+				var e = {
+					eventType: eventName,
+					resourceType: this.getResourceType()
+				};
+				e[this.getResourceType()] = result;
+				this.emit(eventName, e, copy);
+				if (callback) {
 					callback(null, result);
 				}
 			}

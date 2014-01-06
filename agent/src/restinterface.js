@@ -34,7 +34,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function(state, adminState, port) {
+	var create = function(config, agentState, adminState) {
 		//------------------------------
 		// Initialize the REST interface
 		//------------------------------
@@ -45,40 +45,50 @@
 		//------------------------
 		// File Transfer Interface
 		//------------------------
-		server.get('/rest/v1/notifications/', function(req, res) {
+		// Get notifications
+		server.get('/rest/v1/notifications', function(req, res, next){
 			console.log('GET ' + req.path());
 			if(req.query.target){
-				res.send(state.getNotifications(req.query.target));
+				agentState.notification.findResources(function matchTarget(notification) {
+					return req.query.target == notification.target;
+				}, function(err, result) {
+					sendRestResponse(req, res, next, err, result, 'notifications');
+				});
 			}
 			else {
 				res.send(403);
 			}
 		});
-		
-		server.get('/rest/v1/notifications/:id', function(req, res){
+
+		// Get notification
+		server.get('/rest/v1/notifications/:id', function(req, res, next){
 			console.log('GET ' + req.path());
-			res.send(state.getNotification(req.params.id));
-		});
-		
-		server.get('/rest/v1/files/:id', function(req, res){
-			console.log('GET ' + req.path());
-			var file = state.getFile(req.params.id);
-			console.log('filename? ' + file.filename);
-			fs.createReadStream(file.filename).pipe(res);
+			agentState.notification.getResource(req.params.id, function(err, result) {
+				sendRestResponse(req, res, next, err, result, 'notification');
+			});
 		});
 
-		server.del('/rest/v1/notifications/:id', function(req, res){
+		// Delete notification
+		server.del('/rest/v1/notifications/:id', function(req, res, next){
 			console.log('DELETE ' + req.path());
-			var queueItem = state.getNotification(req.params.id);
-			if(state.deleteNotification(req.params.id)) {
-				fs.unlink(queueItem.filename, function(){
-					res.send('ok');
-				});
-			}
-			else {
-				res.send("ok");
-			}
+			agentState.notification.deleteResource(req.params.id, function(err) {
+				sendRestResponse(req, res, next, err, 'ok');
+			});
 		});
+
+		// Get file
+		server.get('/rest/v1/files/:id', function(req, res, next){
+			console.log('GET ' + req.path());
+			agentState.file.getResource(req.params.id, function(err, file) {
+				if (! err) {
+					fs.createReadStream(file.path).pipe(res);
+				}
+				else {
+					next(err);
+				}
+			});
+		});
+
 		//------------------------
 		// Administrator Interface
 		//------------------------
@@ -166,7 +176,7 @@
 		//-------------------------
 		// Start the REST interface
 		//-------------------------
-		server.listen(port, function() {
+		server.listen(config.port, function() {
 		  console.log('Agent listening at %s', server.url);
 		});
 
@@ -179,7 +189,7 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(state, adminState, port) {
-        return create(state, adminState, port);
+    module.exports.create = function(config, agentState, adminState) {
+        return create(config, agentState, adminState);
     };
 }());

@@ -6,7 +6,6 @@ var fs = require('fs');
 var resourceModule = require('resource_module');
 var restinterface = require('./restinterface.js');
 var fileinterface = require('./fileinterface.js');
-var state = require('./state.js');
 var adminProtocolModule = require('./agent_admin_protocol.js');
 var client = require('./client.js');
 
@@ -37,11 +36,63 @@ var adminState = resourceModule.create({
 		}
 	]
 });
-console.log('Admin resources loaded, starting agent...');
+var agentState = resourceModule.create({
+	persistenceDirectory: config.runtimeDir + '/agentState',
+	master: true,
+	resourceSets: [
+		{
+			resourceType: "notification",
+			properties: [
+				{
+					name: "source",
+					type: "number",
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: "target",
+					type: "number",
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: "transfer",
+					type: "number",
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: "fileId",
+					type: "number",
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: "filename",
+					type: "string",
+					required: true,
+					updatesVersion: true
+				}
+			]
+		},
+		{
+			resourceType: "file",
+			properties: [
+				{
+					name: "path",
+					type: "string",
+					required: true,
+					updatesVersion: true
+				}
+			]
+		}
+	]
+});
+console.log('Resources loaded, starting agent...');
 // Initialize server
-var st = state.create();
-var adminProtocol = adminProtocolModule.create(config, st, adminState);
+var adminProtocol = adminProtocolModule.create(config, agentState, adminState);
+restinterface.create(config, agentState, adminState);
+var fi = fileinterface.create(config, agentState, adminState);
 adminProtocol.handleAgentStarted();
-fileinterface.create(st, config, adminState);
-restinterface.create(st, adminState, config.port);
-client.create(config, adminState);
+client.create(config, agentState, adminState);
+fi.start();

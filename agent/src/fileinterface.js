@@ -14,7 +14,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function(state, config, adminState) {
+	var create = function(config, agentState, adminState) {
 		//-----------------------------------------------
 		// Initialize and start the file system interface
 		//-----------------------------------------------
@@ -29,34 +29,25 @@
 
 		var watchers = [];
 
-		onStart();
-
 		//------------
 		// Subscribe to adminState events
 		//------------
 
-		adminState.on('add', function onAdd(resource) {
-			console.log('onAdd: ' + resource.resourceType);
-			if (resource.resourceType === 'transfer') {
-				transferCreated(resource.transfer);
-			}
+		adminState.transfer.on('add', function onAdd(resource) {
+			transferCreated(resource.transfer);
 		});
-		adminState.on('update', function onUpdate(resource, old) {
-			if (resource.resourceType === 'transfer') {
-				transferUpdated(resource.transfer, old);
-			}
+		adminState.transfer.on('update', function onUpdate(resource, old) {
+			transferUpdated(resource.transfer, old);
 		});
-		adminState.on('delete', function onDelete(resource, old) {
-			if (resource.resourceType === 'transfer') {
-				transferDeleted(old);
-			}
+		adminState.transfer.on('delete', function onDelete(resource, old) {
+			transferDeleted(old);
 		});
 
 		//------------
 		//Internals
 		//------------
 
-		function onStart() {
+		function start() {
 			adminState.transfer.findResources(null , function load(err, transfers) {
 				if (err) {
 					console.log('client.onStart error: ' + JSON.stringify(err));
@@ -68,9 +59,10 @@
 		}
 
 		function loadTransfer(transfer) {
-			if (_.some(transfer.sources, function us(source) {
+			var isSource = _.some(transfer.sources, function us(source) {
 				return source.agentId === config.id;
-			})) {
+			});
+			if (isSource) {
 				console.log('fileinterface.loadTransfer found source');
 				var dir = config.inboundDir + '/' + transfer.name;
 				if ( !fs.existsSync(dir)) {
@@ -78,13 +70,9 @@
 				}
 				console.log("Monitoring: " + dir);
 				var watcher = chokidar.watch(dir, {ignored: /[\/\\]\./});
-				watcher
-				.on('add', function(path, event){
-					var targetIds = _.map(transfer.targets, function getTargetId(target){
-						return target.agentId;
-					});
+				watcher.on('add', function(path, event){
 					console.log('Found new file: %s', path);
-					state.addFile(path, targetIds, transfer);
+					agentState.file.addResource({path: path, transferId: transfer.id});
 				});
 			}
 		}
@@ -100,21 +88,19 @@
 			console.log('transferDeleted: ' + transfer.id);
 		}
 
-
-
-
-
 		//------------------------------------
 		// Return the newly created "instance"
 		//------------------------------------
-		return {};
+		return {
+			start : start
+		};
 	};
 
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(state, config, adminState) {
-		return create(state, config, adminState);
+	module.exports.create = function(config, agentState, adminState) {
+		return create(config, agentState, adminState);
 	};
 }());
 

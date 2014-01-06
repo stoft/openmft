@@ -20,9 +20,9 @@
 	// Protocol object
 	//-------------------
 	// Constructor. Initializes/Loads resources asynchronously
-	var Protocol = function(config, state, adminState) {
+	var Protocol = function(config, agentState, adminState) {
 		this.config = config;
-		this.state = state;
+		this.agentState = agentState;
 		this.adminState = adminState;
 		// Subscribe to events from adminState
 		this.adminState.on("add", function onAdd(resource) {
@@ -246,7 +246,7 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(config, state, adminState) {
-		return new Protocol(config, state, adminState);
+	module.exports.create = function(config, agentState, adminState) {
+		return new Protocol(config, agentState, adminState);
 	};
 }());
