@@ -86,7 +86,7 @@
 		// Get transfers
 		server.get('/rest/v1/transfers', function(req, res, next){
 			console.log('GET ' + req.path());
-			adminState.findResources('transfer', null, function(err, result) {
+			adminState.transfer.findResources(null, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'transfers');
 			});
 		});
@@ -94,7 +94,7 @@
 		// Create transfer
 		server.post('/rest/v1/transfers', function(req, res, next){
 			console.log('POST ' + req.path() + ' ' + JSON.stringify(req.body));
-			adminState.addResource('transfer', req.body, function(err, result) {
+			adminState.transfer.addResource(req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'transfer');
 			});
 		});
@@ -102,7 +102,7 @@
 		// Get transfer
 		server.get('/rest/v1/transfers/:id', function(req, res, next){
 			console.log('GET ' + req.path());
-			adminState.getResource('transfer', req.params.id, function(err, result) {
+			adminState.transfer.getResource(req.params.id, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'transfer');
 			});
 		});
@@ -110,7 +110,7 @@
 		// Update transfer
 		server.put('/rest/v1/transfers/:id', function(req, res, next){
 			console.log('PUT ' + req.path());
-			adminState.updateResource('transfer', req.params.id, req.body, function(err, result) {
+			adminState.transfer.updateResource(req.params.id, req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'transfer');
 			});
 		});
@@ -118,7 +118,7 @@
 		// Delete transfer
 		server.del('/rest/v1/transfers/:id', function(req, res, next){
 			console.log('DELETE ' + req.path());
-			adminState.deleteResource('transfer', req.params.id, function(err) {
+			adminState.transfer.deleteResource(req.params.id, function(err) {
 				sendRestResponse(req, res, next, err, 'ok');
 			});
 		});
@@ -126,7 +126,7 @@
 		// Get agents
 		server.get('/rest/v1/agents', function(req, res, next){
 			console.log('GET ' + req.path());
-			adminState.findResources('agent', null, function(err, result) {
+			adminState.agent.findResources(null, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'agents');
 			});
 		});
@@ -134,7 +134,7 @@
 		// Create agent
 		server.post('/rest/v1/agents', function(req, res, next){
 			console.log('POST ' + req.path());
-			adminState.addResource('agent', req.body, function(err, result) {
+			adminState.agent.addResource(req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'agent');
 			});
 		});
@@ -142,7 +142,7 @@
 		// Get agent
 		server.get('/rest/v1/agents/:id', function(req, res, next){
 			console.log('GET ' + req.path());
-			adminState.getResource('agent', req.params.id, function(err, result) {
+			adminState.agent.getResource(req.params.id, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'agent');
 			});
 		});
@@ -150,7 +150,7 @@
 		// Update agent
 		server.put('/rest/v1/agents/:id', function(req, res, next){
 			console.log('PUT ' + req.path());
-			adminState.updateResource('agent', req.params.id, req.body, function(err, result) {
+			adminState.agent.updateResource(req.params.id, req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'agent');
 			});
 		});
@@ -158,7 +158,7 @@
 		// Delete agent
 		server.del('/rest/v1/agents/:id', function(req, res, next){
 			console.log('DELETE ' + req.path());
-			adminState.deleteResource('agent', req.params.id, function(err) {
+			adminState.agent.deleteResource(req.params.id, function(err) {
 				sendRestResponse(req, res, next, err, 'ok');
 			});
 		});

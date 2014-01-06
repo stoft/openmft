@@ -59,7 +59,7 @@
 	// Action: Trigger handleAgentHandshake
 	Protocol.prototype.handleAgentStarted = function() {
 		console.log("handleAgentStarted");
-		this.adminState.findResources("agent", function matchOurself(agent) {
+		this.adminState.agent.findResources(function matchOurself(agent) {
 			return this.config.host === agent.host && this.config.port === agent.port;
 		}.bind(this), function matchedOrNot(err, result) {
 			if (! err && result && result.length > 0) {
@@ -128,7 +128,7 @@
 			if (! err) {
 				// Update our adminState with ourself
 				var adminAgent = obj.agent;
-				this.adminState.addResource("agent", adminAgent);
+				this.adminState.agent.addResource(adminAgent);
 				// Update our config with id and version and persist it
 				this.config.id = adminAgent.id;
 				this.config.version = adminAgent.version;
@@ -195,7 +195,7 @@
 			_.map(transfer.targets, function getAgentId(target) { return target.agentId; })
 		));
 		// Get agents from state (the ones we have)
-		this.adminState.findResources("agent", function matchAgents(agent) {
+		this.adminState.agent.findResources(function matchAgents(agent) {
 			return _.some(agentIds, function match(id) {
 				return agent.id === id;
 			});
@@ -226,7 +226,7 @@
 		adminClient.get("/rest/v1/agents/" + agentId, function onResponse(err, req, res, obj) {
 			if (! err) {
 				// Yeay, we got the agent, now let's store it internally
-				this.adminState.addResource("agent", obj.agent);
+				this.adminState.agent.addResource(obj.agent);
 				console.log("Fetched agent " + agentId + " successfully");
 			}
 			else {

@@ -57,7 +57,7 @@
 		//------------
 
 		function onStart() {
-			adminState.findResources( 'transfer', null , function load(err, transfers) {
+			adminState.transfer.findResources(null , function load(err, transfers) {
 				if (err) {
 					console.log('client.onStart error: ' + JSON.stringify(err));
 				}

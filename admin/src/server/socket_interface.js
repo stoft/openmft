@@ -34,16 +34,16 @@
 			socket.emit("connect", {some: "connected"});
 			// Subscribe to client requests
 			socket.on("list", function(type, callback) {
-				state.findResources(type, null, callback);
+				state[type].findResources(null, callback);
 			});
 			socket.on("add", function(type, data, callback) {
-				state.addResource(type, data, callback);
+				state[type].addResource(data, callback);
 			});
 			socket.on("update", function(type, id, data, callback) {
-				state.updateResource(type, id, data, callback);
+				state[type].updateResource(id, data, callback);
 			});
 			socket.on("delete", function(type, id, callback) {
-				state.deleteResource(type, id, callback);
+				state[type].deleteResource(id, callback);
 			});
 		}.bind(this));
 		// Subscribe to events and publish them to connected sockets
@@ -60,11 +60,6 @@
 			handleEvent(this, e);
 		}.bind(this));
 	};
-
-	// Add a resource (asynchronously)
-	// State.prototype.addConnection = function(type, data, callback) {
-	// 	getResourceSet(this, type).addResource(data, callback);
-	// };
 
 	//---------------
 	// Module exports

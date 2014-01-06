@@ -51,30 +51,23 @@
 		// Subscribe to adminState events
 		//------------
 
-		adminState.on('add', function onAdd(resource) {
-			console.log('onAdd: ' + resource.resourceType);
-			if (resource.resourceType === 'agent') {
-				agentCreated(resource.agent);
-			}
-			else if (resource.resourceType === 'transfer') {
-				transferCreated(resource.transfer);
-			}
+		adminState.agent.on('add', function onAdd(resource) {
+			agentCreated(resource.agent);
 		});
-		adminState.on('update', function onUpdate(resource, old) {
-			if (resource.resourceType === 'agent') {
-				agentUpdated(resource.agent, old);
-			}
-			else if (resource.resourceType === 'transfer') {
-				transferUpdated(resource.transfer, old);
-			}
+		adminState.agent.on('update', function onUpdate(resource, old) {
+			agentUpdated(resource.agent, old);
 		});
-		adminState.on('delete', function onDelete(resource, old) {
-			if (resource.resourceType === 'agent') {
-				agentDeleted(old);
-			}
-			else if (resource.resourceType === 'transfer') {
-				transferDeleted(old);
-			}
+		adminState.agent.on('delete', function onDelete(resource, old) {
+			agentDeleted(old);
+		});
+		adminState.transfer.on('add', function onAdd(resource) {
+			transferCreated(resource.transfer);
+		});
+		adminState.transfer.on('update', function onUpdate(resource, old) {
+			transferUpdated(resource.transfer, old);
+		});
+		adminState.transfer.on('delete', function onDelete(resource, old) {
+			transferDeleted(old);
 		});
 
 		//------------
@@ -88,7 +81,7 @@
 		}
 
 		function onStart() {
-			adminState.findResources( 'transfer', null , function load(err, transfers) {
+			adminState.transfer.findResources(null , function load(err, transfers) {
 				if (err) {
 					console.log('client.onStart error: ' + JSON.stringify(err));
 				}
@@ -106,7 +99,7 @@
 				var sourceAgentIds = _.map(transfer.sources, function getId(source) {
 					return source.agentId;
 				});
-				adminState.findResources('agent', function(agent) {
+				adminState.agent.findResources(function(agent) {
 					// console.log('Compare ' + agent.id + ' to ' + JSON.stringify(sourceAgentIds));
 					return _.some(sourceAgentIds, function inSources(sourceAgentId) {
 						return agent.id === sourceAgentId;
@@ -230,7 +223,7 @@
 
 		function processNotifications(host, port, notifications) {
 			for (var i = 0; i < notifications.length; i++) {
-				adminState.getResource('transfer', notifications[i].transfer, function getTransfer(err, transfer) {
+				adminState.transfer.getResource(notifications[i].transfer, function getTransfer(err, transfer) {
 					getFile(host, port, notifications[i], transfer, deleteNotification);
 				});
 			}

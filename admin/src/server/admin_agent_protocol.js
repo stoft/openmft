@@ -94,7 +94,7 @@
 	// Action: Trigger handleAdminHandshake for all agents
 	Protocol.prototype.handleAdminStarted = function() {
 		console.log("handleAdminStarted");
-		this.state.findResources("agent", null, function iterateAgents(err, agents) {
+		this.state.agent.findResources(null, function iterateAgents(err, agents) {
 			if (! err) {
 				for (var i = 0; i < agents.length; i++) {
 					this.handleAdminHandshake(agents[i]);
@@ -176,7 +176,7 @@
 	Protocol.prototype.handleAgentUpdateState = function(agent, state) {
 		if (agent.state !== state) {
 			console.log("handleAgentUpdateState (agentId: " + agent.id + ", state: " + state + ")");
-			this.state.updateResource("agent", agent.id, {id: agent.id, version: agent.version, state: state});
+			this.state.agent.updateResource(agent.id, {id: agent.id, version: agent.version, state: state});
 		}
 	};
 
@@ -201,7 +201,7 @@
 			},
 			function getAdminTransfers(callback) {
 				// Get transfers that have the agent as either a source or a target
-				this.state.findResources("transfer", function filter(transfer) {
+				this.state.transfer.findResources(function filter(transfer) {
 					return _.some(transfer.sources, function match(source) {
 						return source.agentId === agent.id;
 					}) ||
@@ -242,7 +242,7 @@
 			_.map(transfer.targets, function getAgentId(target) { return target.agentId; })
 		));
 		// Get agents from state
-		this.state.findResources("agent", function matchAgents(agent) {
+		this.state.agent.findResources(function matchAgents(agent) {
 			return _.some(agentIds, function match(id) {
 				return agent.id === id;
 			});
@@ -279,7 +279,7 @@
 			var updateAgentIds = _.intersection(agentIds, oldAgentIds);
 			var deleteAgentIds = _.difference(oldAgentIds, agentIds);
 			// Add transfer to certain agents
-			this.state.findResources("agent", function matchAgents(agent) {
+			this.state.agent.findResources(function matchAgents(agent) {
 				return _.some(addAgentIds, function match(id) {
 					return agent.id === id;
 				});
@@ -294,7 +294,7 @@
 				}
 			}.bind(this));
 			// Update transfer to certain agents
-			this.state.findResources("agent", function matchAgents(agent) {
+			this.state.agent.findResources(function matchAgents(agent) {
 				return _.some(updateAgentIds, function match(id) {
 					return agent.id === id;
 				});
@@ -309,7 +309,7 @@
 				}
 			}.bind(this));
 			// Delete transfer to certain agents
-			this.state.findResources("agent", function matchAgents(agent) {
+			this.state.agent.findResources(function matchAgents(agent) {
 				return _.some(deleteAgentIds, function match(id) {
 					return agent.id === id;
 				});
@@ -336,7 +336,7 @@
 			_.map(transfer.targets, function getAgentId(target) { return target.agentId; })
 		));
 		// Get agents from state
-		this.state.findResources("agent", function matchAgents(agent) {
+		this.state.agent.findResources(function matchAgents(agent) {
 			return _.some(agentIds, function match(id) {
 				return agent.id === id;
 			});
@@ -437,7 +437,7 @@
 		console.log("handleTransferOutOfSync (agentId: " + agent.id + ", transferId: " + transfer.id + ", state: " + state + ")");
 		if (state !== "DIFFERENT_VERSION") {
 			transfer.state = "OUT_OF_SYNC";
-			this.state.updateResource("transfer", transfer);
+			this.state.transfer.updateResource(transfer);
 		}
 		var agentClient = restify.createJsonClient({
 			url: "http://" + agent.host + ":" + agent.port,
@@ -495,7 +495,7 @@
 			state = "SYNCHRONIZED";
 		}
 		// Update sync state
-		this.state.updateResource("transfer", transfer.id, {
+		this.state.transfer.updateResource(transfer.id, {
 			id: transfer.id,
 			version: transfer.version,
 			synced: synced,
