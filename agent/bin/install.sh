@@ -8,7 +8,7 @@ fi
 AGENTID=$1
 
 # Get absolute path of agent top directory
-AGENTDIR=$(cd "$(dirname $(dirname "$0"))"; pwd)
+AGENTDIR=$(dirname $(cd "$(dirname "$0")"; pwd))
 BASEDIR=$AGENTDIR
 
 # If supplied as an argument, replace BASEDIR
