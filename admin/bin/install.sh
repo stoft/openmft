@@ -8,7 +8,7 @@ fi
 DOMAIN=$1
 
 # Get absolute path of admin top directory
-ADMINDIR=$(cd "$(dirname $(dirname "$0"))"; pwd)
+ADMINDIR=$(dirname $(cd "$(dirname "$0")"; pwd))
 BASEDIR=$ADMINDIR
 
 # If supplied as an argument, replace BASEDIR

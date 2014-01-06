@@ -63,14 +63,14 @@
   },
   "originalConfig": {
     "shim": {
+      "underscore": {
+        "exports": "_"
+      },
       "bootstrap": {
         "deps": [
           "jquery"
         ],
         "exports": "jQuery"
-      },
-      "underscore": {
-        "exports": "_"
       }
     },
     "paths": {
@@ -80,9 +80,9 @@
       "bootstrap": "../vendor/bootstrap/bootstrap",
       "durandal": "../vendor/durandal",
       "async": "../vendor/async/async",
+      "underscore": "../vendor/underscore/underscore",
       "plugins": "../vendor/durandal/plugins",
-      "transitions": "../vendor/durandal/transitions",
-      "underscore": "../vendor/underscore/underscore"
+      "transitions": "../vendor/durandal/transitions"
     }
   },
   "requireFiles": [
