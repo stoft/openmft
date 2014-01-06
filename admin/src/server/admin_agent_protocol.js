@@ -494,6 +494,8 @@
 		if (agentCount === syncCount) {
 			state = "SYNCHRONIZED";
 		}
+		// Set synced on object directly (as this old transfer object is used by other events in the pipeline)
+		transfer.synced = synced;
 		// Update sync state
 		this.state.transfer.updateResource(transfer.id, {
 			id: transfer.id,

@@ -262,15 +262,17 @@
 
 		function getNotifications(host, port, config) {
 			var client = createJsonClient(host, port);
-			console.log('client.getNotifications ' + host + ' ' + port);
+			// console.log('client.getNotifications ' + host + ' ' + port);
 
 			client.get(restApi.NOTIFICATIONS + '?target=' + config.id, function(err, req, res, obj) {
 				if (err) {
 					console.log('Could not get notifications: ' + JSON.stringify(err));
 				}
 				else {
-					console.log('Got notifications: %d', Object.keys(obj.notifications).length);
-					processNotifications(host, port, obj.notifications);
+					if (obj.notifications.length > 0) {
+						console.log('Got notifications: %d', Object.keys(obj.notifications).length);
+						processNotifications(host, port, obj.notifications);
+					}
 				}
 			});
 		}
