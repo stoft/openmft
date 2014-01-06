@@ -62,7 +62,8 @@
 		
 		server.get('/rest/v1/files/:id', function(req, res){
 			console.log('GET ' + req.path());
-			var file = state.getNotification(req.params.id);
+			var file = state.getFile(req.params.id);
+			console.log('filename? ' + file.filename);
 			fs.createReadStream(file.filename).pipe(res);
 		});
 
@@ -75,7 +76,7 @@
 				});
 			}
 			else {
-				res.send(404);
+				res.send("ok");
 			}
 		});
 		//------------------------
@@ -92,7 +93,7 @@
 
 		// Create transfer
 		server.post('/rest/v1/transfers', function(req, res, next){
-			console.log('POST ' + req.path() + " " + JSON.stringify(req.body));
+			console.log('POST ' + req.path() + ' ' + JSON.stringify(req.body));
 			adminState.addResource('transfer', req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'transfer');
 			});

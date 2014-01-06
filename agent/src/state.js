@@ -70,6 +70,10 @@
 			return index;
 		}
 
+		function getFile(id) {
+			return files[getFileIndex(id)];
+		}
+
 		function addFile(path, targets, transfer) {
 			var file = { filename : path, id : fileCounter++};
 
@@ -98,6 +102,7 @@
 			// Files (metadata about files)
 			//-----------------------------
 			getFileIndex: getFileIndex,
+			getFile: getFile,
 			addFile: addFile
 		};
 	};
