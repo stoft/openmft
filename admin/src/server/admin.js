@@ -118,25 +118,18 @@
 					]
 				}
 			]
-		}, function(err) {
-			if (! err) {
-				console.log("Resources loaded, starting server...");
-				// Initialize server
-				var protocol = agentProtocol.create(state);
-				var server = restInterface.create(config, state);
-				var io = socketio.listen(server);
-				io.set("log level", 1); // reduce logging
-				socketInterfaceModule.create(state, io);
-
-				// Mimosa wants us to invoke the callback
-				callback(server, io);
-				protocol.handleAdminStarted();
-			}
-			else {
-				console.log("Could not initialize/load resources, exiting: " + err);
-				process.exit(1);
-			}
 		});
+		console.log("Resources loaded, starting server...");
+		// Initialize server
+		var protocol = agentProtocol.create(state);
+		var server = restInterface.create(config, state);
+		var io = socketio.listen(server);
+		io.set("log level", 1); // reduce logging
+		socketInterfaceModule.create(state, io);
+
+		// Mimosa wants us to invoke the callback
+		callback(server, io);
+		protocol.handleAdminStarted();
 	};
 
 	//---------------

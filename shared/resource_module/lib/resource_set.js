@@ -34,46 +34,32 @@
 	}
 
 	// Load a resource set from file (or create an empty file)
-	function loadResourceSet(resourceSet, callback) {
+	function loadResourceSet(resourceSet) {
 		console.log("Loading " + resourceSet.getResourceType() + "s: " + resourceSet.filename);
 		// Read resource_set asynchronously
-		fs.readFile(resourceSet.filename, function(err, data) {
-			if (! err) {
-				resourceSet.resources = JSON.parse(data);
-				// Update idCounter
-				for (var i = 0; i < resourceSet.resources.length; i++) {
-					if (resourceSet.resources[i].id >= resourceSet.idCounter) {
-						resourceSet.idCounter = resourceSet.resources[i].id + 1;
-					}
-				}
-				console.log("Loaded " + resourceSet.getResourceType() + "s (" + resourceSet.resources.length + ")");
-				// Return loaded result set object asynchronously
-				if (callback) {
-					callback(null, resourceSet);
+		if (fs.existsSync(resourceSet.filename)) {
+			var data = fs.readFileSync(resourceSet.filename);
+			resourceSet.resources = JSON.parse(data);
+			// Update idCounter
+			for (var i = 0; i < resourceSet.resources.length; i++) {
+				if (resourceSet.resources[i].id >= resourceSet.idCounter) {
+					resourceSet.idCounter = resourceSet.resources[i].id + 1;
 				}
 			}
-			else {
-				// Write a fresh resources files (error most likely to file being missing...)
-				fs.writeFile(resourceSet.filename, JSON.stringify([]), function(err) {
-					if (callback) {
-						if (err) {
-							callback(new restify.InternalServerError("Could not persist resource set"));
-						}
-						else {
-							console.log("Created new " + resourceSet.getResourceType() + " file");
-							callback(null, resourceSet);
-						}
-					}
-				});
-			}
-		});
-}
+			console.log("Loaded " + resourceSet.getResourceType() + "s (" + resourceSet.resources.length + ")");
+		}
+		else {
+			// Write a fresh resources file
+			fs.writeFileSync(resourceSet.filename, JSON.stringify([]));
+			console.log("Created new " + resourceSet.getResourceType() + " file");
+		}
+	}
 
 	//-------------------
 	// ResourceSet object
 	//-------------------
-	// Constructor. Initializes/Loads resources asynchronously
-	var ResourceSet = function(definition, master, callback) {
+	// Constructor. Initializes/Loads resources
+	var ResourceSet = function(definition, master) {
 		// ResourceSet state
 		this.definition = definition;
 		this.master = master;
@@ -81,7 +67,7 @@
 		this.filename = definition.filename;
 		this.resources = [];
 		this.idCounter = 1;
-		loadResourceSet(this, callback);
+		loadResourceSet(this);
 	};
 	// Add eventing
 	util.inherits(ResourceSet, EventEmitter);
@@ -207,7 +193,7 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(definition, master, callback) {
-		return new ResourceSet(definition, master, callback);
+	module.exports.create = function(definition, master) {
+		return new ResourceSet(definition, master);
 	};
 }());

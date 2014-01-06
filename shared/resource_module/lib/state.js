@@ -8,7 +8,7 @@
 	//-------------
 	// Dependencies
 	//-------------
-	var async = require("async");
+	var _ = require("underscore");
 	var EventEmitter = require("events").EventEmitter;
 	var util = require("util");
 	var fs = require("fs");
@@ -21,10 +21,9 @@
 	//-------------
 	// State object
 	//-------------
-	// Constructor. Note that initialization/loading is performed asynchronously
-	var State = function(options, callback) {
+	// Constructor.
+	var State = function(options) {
 		// ResourceSet state
-		this._resourceSets = [];
 		this._persistenceDirectory = "/tmp";
 		// Read options
 		if (options && options.persistenceDirectory) {
@@ -34,39 +33,19 @@
 		if (! fs.existsSync(this._persistenceDirectory)) {
 			fs.mkdirSync(this._persistenceDirectory);
 		}
-		// Initialize/load resource sets asynchronously
-		async.map(options.resourceSets, function(resourceSetOptions, callback) {
+		// Initialize/load resource
+		_.each(options.resourceSets, function(resourceSetOptions) {
 			// Load a single resource set, send callback to let async know the results
 			if (! resourceSetOptions.filename) {
 				resourceSetOptions.filename = this._persistenceDirectory + "/" + resourceSetOptions.resourceType + ".json";
 			}
-			this[resourceSetOptions.resourceType] = resourceSet.create(resourceSetOptions, options.master, callback);
-			return this[resourceSetOptions.resourceType];
-		}.bind(this), function(err, results) {
-			if (err) {
-				// At least one of the resource sets failed to initialize/load
-				console.log("Failed to initialize/load state: " + err);
-				this.emit("error", "Failed to initialize/load state: " + err);
-				if (callback) {
-					callback(err);
-				}
-			}
-			else {
-				// All resource sets are now initialized/loaded successfully
-				this._resourceSets = results;
-				// Subscribe to changes (resubmit them)
-				for (var i = 0; i < this._resourceSets.length; i++) {
-					this._resourceSets[i].on("add", this.handleResourceAdded.bind(this));
-					this._resourceSets[i].on("update", this.handleResourceUpdated.bind(this));
-					this._resourceSets[i].on("delete", this.handleResourceDeleted.bind(this));
-				}
-				console.log("State initialized/loaded (" + this._resourceSets.length + ")");
-				this.emit("initialized", this);
-				if (callback) {
-					callback(null, this);
-				}
-			}
+			var rs = resourceSet.create(resourceSetOptions, options.master);
+			rs.on("add", this.handleResourceAdded.bind(this));
+			rs.on("update", this.handleResourceUpdated.bind(this));
+			rs.on("delete", this.handleResourceDeleted.bind(this));
+			this[resourceSetOptions.resourceType] = rs;
 		}.bind(this));
+		console.log("State initialized/loaded");
 	};
 	// Add eventing to state object
 	util.inherits(State, EventEmitter);
@@ -85,7 +64,7 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(options, callback) {
-        return new State(options, callback);
+    module.exports.create = function(options) {
+        return new State(options);
     };
 }());
