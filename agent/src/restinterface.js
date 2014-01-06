@@ -46,6 +46,7 @@
 		// File Transfer Interface
 		//------------------------
 		server.get('/rest/v1/notifications/', function(req, res) {
+			console.log('GET ' + req.path());
 			if(req.query.target){
 				res.send(state.getNotifications(req.query.target));
 			}
@@ -55,15 +56,18 @@
 		});
 		
 		server.get('/rest/v1/notifications/:id', function(req, res){
+			console.log('GET ' + req.path());
 			res.send(state.getNotification(req.params.id));
 		});
 		
 		server.get('/rest/v1/files/:id', function(req, res){
+			console.log('GET ' + req.path());
 			var file = state.getNotification(req.params.id);
 			fs.createReadStream(file.filename).pipe(res);
 		});
 
 		server.del('/rest/v1/notifications/:id', function(req, res){
+			console.log('DELETE ' + req.path());
 			var queueItem = state.getNotification(req.params.id);
 			if(state.deleteNotification(req.params.id)) {
 				fs.unlink(queueItem.filename, function(){

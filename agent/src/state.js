@@ -70,13 +70,13 @@
 			return index;
 		}
 
-		function addFile(path, targets) {
+		function addFile(path, targets, transfer) {
 			var file = { filename : path, id : fileCounter++};
 
 			files.push( file );
 
 			targets.forEach(function(target){
-				var notification = { filename : path, id : notificationCounter++, target : target, fileId: file.id };
+				var notification = { filename : path, id : notificationCounter++, target : target, fileId: file.id, transfer : transfer.id };
 				notifications.push(notification);
 
 			});

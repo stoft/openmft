@@ -27,20 +27,55 @@
 	// Dependencies
 	//-------------
 	var restify = require('restify');
+	var _ = require('underscore');
 	var fs = require('fs');
+	var path = require('path');
 	var restApi = require('./restapi.js');
 
 
 	//------------
 	// Constructor
 	//------------	
-	var create = function(config) {
+	var create = function(config, adminState) {
 
 		//-----------------------
 		// Hidden state variables
 		//-----------------------
 		var subscriptions = {};
 		var configuration = config;
+		// var adminState = adminState;
+
+		onStart();
+
+		//------------
+		// Subscribe to adminState events
+		//------------
+
+		adminState.on('add', function onAdd(resource) {
+			console.log('onAdd: ' + resource.resourceType);
+			if (resource.resourceType === 'agent') {
+				agentCreated(resource.agent);
+			}
+			else if (resource.resourceType === 'transfer') {
+				transferCreated(resource.transfer);
+			}
+		});
+		adminState.on('update', function onUpdate(resource, old) {
+			if (resource.resourceType === 'agent') {
+				agentUpdated(resource.agent, old);
+			}
+			else if (resource.resourceType === 'transfer') {
+				transferUpdated(resource.transfer, old);
+			}
+		});
+		adminState.on('delete', function onDelete(resource, old) {
+			if (resource.resourceType === 'agent') {
+				agentDeleted(old);
+			}
+			else if (resource.resourceType === 'transfer') {
+				transferDeleted(old);
+			}
+		});
 
 		//------------
 		//Internals
@@ -50,6 +85,60 @@
 				url: 'http://' + host + ':' + port,
 				version: '*'
 			});
+		}
+
+		function onStart() {
+			adminState.findResources( 'transfer', null , function load(err, transfers) {
+				if (err) {
+					console.log('client.onStart error: ' + JSON.stringify(err));
+				}
+				else {
+					_.each(transfers, loadTransfer);
+				}
+			});
+		}
+
+		function loadTransfer(transfer) {
+			if (_.some(transfer.targets, function us(target) {
+				return target.agentId === config.id;
+			})) {
+				console.log('We are the target!');
+				var sourceAgentIds = _.map(transfer.sources, function getId(source) {
+					return source.agentId;
+				});
+				adminState.findResources('agent', function(agent) {
+					// console.log('Compare ' + agent.id + ' to ' + JSON.stringify(sourceAgentIds));
+					return _.some(sourceAgentIds, function inSources(sourceAgentId) {
+						return agent.id === sourceAgentId;
+					});
+				}, function foundSourceAgents(err, sourceAgents) {
+					console.log('We now have a list of source agents: ' + sourceAgents.length);
+					_.each(sourceAgents, function doSubscribe(agent) {
+						console.log('Subscribe to agent ' + agent.id);
+						subscribe(agent.id, agent.host, agent.port);
+					});
+				});
+			}
+		}
+
+		function agentCreated(agent) {
+			console.log('agentCreated: ' + agent.id);
+		}
+		function agentUpdated(agent, old) {
+			console.log('agentUpdated: ' + agent.id);
+		}
+		function agentDeleted(agent) {
+			console.log('agentDeleted: ' + agent.id);
+		}
+		function transferCreated(transfer) {
+			console.log('transferCreated: ' + transfer.id + ' we are ' + config.id);
+			loadTransfer(transfer);
+		}
+		function transferUpdated(transfer, old) {
+			console.log('transferUpdated: ' + transfer.id);
+		}
+		function transferDeleted(transfer) {
+			console.log('transferDeleted: ' + transfer.id);
 		}
 
 		//------------
@@ -63,7 +152,8 @@
 		}
 
 		function subscribe(agentId, host, port) {
-			var intervalId = setInterval(getNotifications, 60000, host, port, config);
+			console.log('client.subscribe ' + agentId + ' ' + host + ' ' + port);
+			var intervalId = setInterval(getNotifications, 10000, host, port, config);
 			subscriptions[agentId] = intervalId;
 		}
 
@@ -73,22 +163,23 @@
 			delete subscriptions[agentId];
 		}
 
-		function getFile(host, port, notification, callback) {
+		function getFile(host, port, notification, transfer, callback) {
 			console.log(JSON.stringify(notification));
 			var index = notification.filename.lastIndexOf('/');
 			var filename = notification.filename.substring(index + 1);
 			var tmpFolder = (configuration.runtimeDir.charAt(
-				configuration.runtimeDir.length - 1) === '/')
-			? configuration.runtimeDir
-			: configuration.runtimeDir + '/';
+				configuration.runtimeDir.length - 1) === '/') ?
+					configuration.runtimeDir :
+					configuration.runtimeDir + '/';
 			var finalFolder = (configuration.outboundDir.charAt(
-				configuration.outboundDir.length - 1) === '/')
-			? configuration.outboundDir
-			: configuration.runtimeDir + '/';
+				configuration.outboundDir.length - 1) === '/') ?
+					configuration.outboundDir :
+					configuration.outboundDir + '/';
+			finalFolder += transfer.name + '/';
 			var file = fs.createWriteStream(tmpFolder + filename);
 			console.log('Created file stream: ' + tmpFolder + filename);
 			var client = restify.createClient({ url : 'http://' + host + ':' + port });
-			client.get(restApi.NOTIFICATIONS + notification.fileId, function(err, req) {
+			client.get(restApi.FILES + '/' + notification.fileId, function(err, req) {
 				if(err) {
 					console.log('Error performing request: ' + JSON.stringify(err));
 					throw err;
@@ -114,6 +205,10 @@
 		}
 
 		function moveFile(oldPath, newPath){
+			console.log('Moving file %s to %s.', oldPath, newPath );
+			if ( !fs.existsSync(path.dirname(newPath)) ) {
+				fs.mkdirSync(path.dirname(newPath));
+			}
 			fs.rename(oldPath, newPath, function(err){
 				if (err) {
 					console.log('Error moving file %s to %s.', oldPath, newPath );
@@ -123,7 +218,7 @@
 
 		function deleteNotification(host, port, notification) {
 			var client = createJsonClient(host, port);
-			client.del(restApi.NOTIFICATIONS + notification.id, function(err, req, res) {
+			client.del(restApi.NOTIFICATIONS + '/' + notification.id, function(err, req, res) {
 				if(err) {
 					console.log('Error deleting notification: ' + JSON.stringify(err));
 					throw err;
@@ -135,12 +230,15 @@
 
 		function processNotifications(host, port, notifications) {
 			for (var i = 0; i < notifications.length; i++) {
-				getFile(host, port, notifications[i], deleteNotification);
+				adminState.getResource('transfer', notifications[i].transfer, function getTransfer(err, transfer) {
+					getFile(host, port, notifications[i], transfer, deleteNotification);
+				});
 			}
 		}
 
 		function getNotifications(host, port, config) {
 			var client = createJsonClient(host, port);
+			console.log('client.getNotifications ' + host + ' ' + port);
 
 			client.get(restApi.NOTIFICATIONS + '?target=' + config.id, function(err, req, res, notifications) {
 				if (err) {
@@ -172,8 +270,8 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(config) {
-    	//TODO subscribe to each source.
-        return create(config);
-    };
+	module.exports.create = function(config, adminState) {
+		//TODO subscribe to each source.
+		return create(config, adminState);
+	};
 }());

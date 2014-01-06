@@ -86,11 +86,11 @@ var adminState = resourceModule.create({
 		console.log('Admin resources loaded, starting agent...');
 		// Initialize server
 		var st = state.create();
-		fileinterface.create(st, config);
-		restinterface.create(st, adminState, config.port);
-		client.create(config);
 		var adminProtocol = adminProtocolModule.create(config, st, adminState);
 		adminProtocol.handleAgentStarted();
+		fileinterface.create(st, config, adminState);
+		restinterface.create(st, adminState, config.port);
+		client.create(config, adminState);
 	}
 	else {
 		console.log('Could not initialize/load resources, exiting: ' + err);

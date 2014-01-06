@@ -122,8 +122,6 @@
 		server.get(/fonts?\/.*/, serve);
 		server.get(/images\/.*/, serve);
 		server.get(/stylesheets\/.*/, serve);
-		server.get(/x\/.*/, serve);
-		server.get(/test.txt/, serve);
 		// Anything else is redirected to SPA (index.html)
 		server.get(/.*/, serveIndex);
 
