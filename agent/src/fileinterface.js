@@ -69,7 +69,7 @@
 					fs.mkdirSync(dir);
 				}
 				console.log("Monitoring: " + dir);
-				var watcher = chokidar.watch(dir, {ignored: /[\/\\]\./});
+				var watcher = chokidar.watch(dir, {ignored: /[\/\\]\./, interval: 5});
 				watcher.on('add', function(path, event){
 					console.log('Found new file: %s', path);
 					agentState.file.addResource({path: path, transferId: transfer.id});

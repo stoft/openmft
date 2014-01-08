@@ -89,16 +89,22 @@
 			});
 		});
 		agentState.notification.on('delete', function onDelete(id, notification) {
-			console.log('Notification deleted, lets see if the file should be deleted');
-			agentState.notification.findResources(function sameFile(n) {
-				return notification.fileId === n.fileId;
-			}, function (err, notifications) {
-				if (! err && notifications.length === 0) {
-					console.log('No notifications left for the file, lets delete it');
-					agentState.file.deleteResource(notification.fileId);
-					fs.unlink(notification.filename);
-				}
-			});
+			if (notification.source === config.id) {
+				console.log('Notification deleted, lets see if the file should be deleted');
+				agentState.notification.findResources(function sameFile(n) {
+					return notification.fileId === n.fileId;
+				}, function (err, notifications) {
+					if (! err && notifications.length === 0) {
+						console.log('No notifications left for the file, lets delete it');
+						agentState.file.deleteResource(notification.fileId);
+						fs.unlink(notification.filename);
+					}
+				});
+			}
+		});
+		agentState.notification.on('add', function onAdd(resource) {
+			console.log('Notification added: ' + resource.notification.id);
+			processNotification(resource.notification);
 		});
 
 		//------------
@@ -177,7 +183,7 @@
 
 		function subscribe(agentId, host, port) {
 			console.log('client.subscribe ' + agentId + ' ' + host + ' ' + port);
-			var intervalId = setInterval(getNotifications, 10000, host, port, config);
+			var intervalId = setInterval(getNotifications, 60000, host, port, config);
 			subscriptions[agentId] = intervalId;
 		}
 
@@ -188,7 +194,7 @@
 		}
 
 		function getFile(host, port, notification, transfer, callback) {
-			console.log(JSON.stringify(notification));
+			// console.log(JSON.stringify(notification));
 			var index = notification.filename.lastIndexOf('/');
 			var filename = notification.filename.substring(index + 1);
 			var tmpFolder = (configuration.runtimeDir.charAt(
@@ -222,6 +228,9 @@
 							})
 							.on('finish', function() {
 								moveFile(tmpFolder + filename, finalFolder + filename);
+							})
+							.on('finish', function() {
+								agentState.notification.deleteResource(notification.id);
 							});
 					}
 				});
@@ -248,17 +257,42 @@
 					throw err;
 				}
 				// assert.ifError(err);
-				console.log('Deleted notification. id: %d, status: %d', notification.id, res.statusCode);
+				console.log('Deleted notification. id: %s, status: %d', notification.id, res.statusCode);
 			});
 		}
 
-		function processNotifications(host, port, notifications) {
-			for (var i = 0; i < notifications.length; i++) {
-				adminState.transfer.getResource(notifications[i].transfer, function getTransfer(err, transfer) {
-					getFile(host, port, notifications[i], transfer, deleteNotification);
+		function processNotification(notification) {
+			if (notification.source != config.id) {
+				// Lets get the file!
+				// console.log('processNotification: ' + JSON.stringify(notification));
+				// Get agent
+				var source = adminState.agent.getResourceSync(notification.source);
+				// Get transfer
+				var transfer = adminState.transfer.getResourceSync(notification.transfer);
+				// Get file
+				getFile(source.host, source.port, notification, transfer, deleteNotification);
+			}
+			else {
+				// Lets push the notification to it's target!
+				var target = adminState.agent.getResourceSync(notification.target);
+				var client = createJsonClient(target.host, target.port);
+				client.post(restApi.NOTIFICATIONS, notification, function(err, req, res) {
+					if(err) {
+						console.log('Failed to push notification: ' + JSON.stringify(err));
+					}
+					else {
+						console.log('Pushed notification. id: %s, status: %d', notification.id, res.statusCode);
+					}
 				});
 			}
 		}
+		// function processNotifications(host, port, notifications) {
+		// 	for (var i = 0; i < notifications.length; i++) {
+		// 		adminState.transfer.getResource(notifications[i].transfer, function getTransfer(err, transfer) {
+		// 			getFile(host, port, notifications[i], transfer, deleteNotification);
+		// 		});
+		// 	}
+		// }
 
 		function getNotifications(host, port, config) {
 			var client = createJsonClient(host, port);
@@ -271,7 +305,10 @@
 				else {
 					if (obj.notifications.length > 0) {
 						console.log('Got notifications: %d', Object.keys(obj.notifications).length);
-						processNotifications(host, port, obj.notifications);
+						// Add to state, events will fire processNotification
+						_.each(obj.notifications, function process(notification) {
+							agentState.notification.addResource(notification);
+						});
 					}
 				}
 			});
@@ -286,7 +323,7 @@
 			unsubscribe: unsubscribe,
 			getFile: getFile,
 			deleteNotification: deleteNotification,
-			processNotifications: processNotifications,
+			// processNotifications: processNotifications,
 			getNotifications: getNotifications,
 			reloadConfig : reloadConfig
 		};

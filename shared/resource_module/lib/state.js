@@ -39,7 +39,7 @@
 			if (! resourceSetOptions.filename) {
 				resourceSetOptions.filename = this._persistenceDirectory + "/" + resourceSetOptions.resourceType + ".json";
 			}
-			var rs = resourceSet.create(resourceSetOptions, options.master);
+			var rs = resourceSet.create(resourceSetOptions, options.master, options.distributed);
 			rs.on("add", this.handleResourceAdded.bind(this));
 			rs.on("update", this.handleResourceUpdated.bind(this));
 			rs.on("delete", this.handleResourceDeleted.bind(this));

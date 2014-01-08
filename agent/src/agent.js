@@ -39,6 +39,7 @@ var adminState = resourceModule.create({
 var agentState = resourceModule.create({
 	persistenceDirectory: config.runtimeDir + '/agentState',
 	master: true,
+	distributed: true,
 	resourceSets: [
 		{
 			resourceType: "notification",

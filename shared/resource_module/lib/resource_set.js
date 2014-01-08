@@ -14,6 +14,7 @@
 	var _ = require("underscore");
 	var async = require("async");
 	var restify = require("restify");
+	var uuid = require("node-uuid");
 
 	//----------------------------
 	// Hidden (internal) functions
@@ -59,10 +60,11 @@
 	// ResourceSet object
 	//-------------------
 	// Constructor. Initializes/Loads resources
-	var ResourceSet = function(definition, master) {
+	var ResourceSet = function(definition, master, distributed) {
 		// ResourceSet state
 		this.definition = definition;
 		this.master = master;
+		this.distributed = distributed;
 		this.resourceType = definition.resourceType;
 		this.filename = definition.filename;
 		this.resources = [];
@@ -92,6 +94,10 @@
 			callback(new restify.ResourceNotFoundError("Could not find resource " + id + " of type " + this.getResourceType()));
 		}
 	};
+	// Get a resource with a specific id (synchronously)
+	ResourceSet.prototype.getResourceSync = function(id) {
+		return this.resources[getResourceIndex(this, id)];
+	};
 	// Get all resources (asynchronously)
 	ResourceSet.prototype.findResources = function(filter, callback) {
 		if (filter) {
@@ -104,10 +110,15 @@
 	// Add a resource (asynchronously)
 	ResourceSet.prototype.addResource = function(data, callback) {
 		// ToDo: Validate data
-		// ToDo: Map data to admin structure
-		if (this.master) {
+		// If distributed, validate that we don't already have the resource with that id
+		if (data.id && this.distributed && getResourceIndex(this, data.id) > 0) {
+			throw new restify.ConflictError("A %s with id %s already exists", this.resourceType, data.id);
+		}
+		if ((!data.id && this.distributed) || (this.master && !this.distributed)) {
 			// Generate unique id
-			data.id = this.idCounter++;
+			data.id = this.distributed ?
+				uuid.v4() :
+				this.idCounter++;
 			// Create resource version
 			data.version = 1;
 		}
@@ -197,7 +208,7 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(definition, master) {
-		return new ResourceSet(definition, master);
+	module.exports.create = function(definition, master, distributed) {
+		return new ResourceSet(definition, master, distributed);
 	};
 }());

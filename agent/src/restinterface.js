@@ -27,6 +27,7 @@
 			return next();
 		}
 		else {
+			console.log(err);
 			return next(err);
 		}
 	}
@@ -66,6 +67,23 @@
 			agentState.notification.getResource(req.params.id, function(err, result) {
 				sendRestResponse(req, res, next, err, result, 'notification');
 			});
+		});
+
+		// Push notification
+		server.post('/rest/v1/notifications', function(req, res, next){
+			console.log('POST ' + req.path());
+			// Ignore duplicates
+			try {
+				agentState.notification.addResource(req.body, function(err, result) {
+					sendRestResponse(req, res, next, err, result, 'notification');
+				});
+			}
+			catch (e) {
+				// Return existing notification if already exist
+				agentState.notification.getResource(req.params.id, function(err, result) {
+					sendRestResponse(req, res, next, err, result, 'notification');
+				});
+			}
 		});
 
 		// Delete notification

@@ -111,10 +111,6 @@ define(["plugins/http", "durandal/app", "knockout", "state", "bootstrap"], funct
         removeTransfer: function(transfer) {
             this.state.removeTransfer(transfer);
         },
-        test: function(agent) {
-            console.log(JSON.stringify(agent));
-            return "Hi";
-        },
         compositionComplete: function() { // parameters: view, parent
             // Focus on transfer name when showing edit dialog
             $("#myModal").on("shown.bs.modal", function() {

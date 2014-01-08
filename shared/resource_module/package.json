@@ -17,6 +17,7 @@
   "dependencies": {
     "restify": "2.6.x",
     "async": "0.2.x",
+    "node-uuid": "1.4.x",
     "underscore": "1.5.x"
   },
   "license": "MIT",
