@@ -44,7 +44,7 @@
 		});
 
 		//------------
-		//Internals
+		// Externals
 		//------------
 
 		function start() {
@@ -57,6 +57,39 @@
 				}
 			});
 		}
+
+		function getFileReadStream(file) {
+			return fs.createReadStream(file.path).pipe(res);
+		}
+
+		function pushToFile(readableStream, filename, transfer) {
+			var tmpFolder = (configuration.runtimeDir.charAt(
+				configuration.runtimeDir.length - 1) === '/') ?
+					configuration.runtimeDir :
+					configuration.runtimeDir + '/';
+			var finalFolder = (configuration.outboundDir.charAt(
+				configuration.outboundDir.length - 1) === '/') ?
+					configuration.outboundDir :
+					configuration.outboundDir + '/';
+			finalFolder += transfer.name + '/';
+			var file = fs.createWriteStream(tmpFolder + filename);
+			console.log('Created file readableStream: ' + tmpFolder + filename);
+			readableStream.pipe(file);
+			file
+				.on('finish', function() {
+					file.close();
+				})
+				// TODO may need to be replaced with an event update to hook
+				//  in post processing through agentState.
+				.on('finish', function() {
+					moveFile(tmpFolder + filename, finalFolder + filename);
+				});
+			return file;
+		}
+
+		//------------
+		//Internals
+		//------------
 
 		function loadTransfer(transfer) {
 			var isSource = _.some(transfer.sources, function us(source) {
@@ -92,7 +125,9 @@
 		// Return the newly created "instance"
 		//------------------------------------
 		return {
-			start : start
+			start : start,
+			getFileReadStream : getFileReadStream,
+			pushToFile : pushToFile
 		};
 	};
 
