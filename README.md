@@ -94,6 +94,8 @@ Optionally modify configuration parameters to your liking:
 ## Resources
 
 ### Notification Resource
+A notification that a new file is available from an agent. 
+
 Property | Type | Description | C | R | U | D
 --- | --- | --- | --- | --- | --- | ---
 id | int | Agent unique identifier set by the agent, may be subject for reuse after considerable time. | M | M | - | M
@@ -105,6 +107,7 @@ fileId | int | Agent unique identifier set by the agent. May be subject for reus
 filename | string | The full filename including path of the file. | M | M | - | M
 
 ### Agent Resource
+A single MFT agent.
 
 Property | Type | Description | C | R | U | D
 --- | --- | --- | --- | --- | --- | ---
@@ -117,6 +120,7 @@ inboundDir | string | Root directory that the agent monitors for inbound files (
 outboundDir | string | Root directory where the agent puts outbound files (from the MFT network to an external source) | M | | O |
 
 ### Transfer Resource
+A definition of a transfer between two or more agents (1:1, M:M).
 
 Property | Type | Description | C | R | U | D
 --- | --- | --- | --- | --- | --- | ---
@@ -135,6 +139,20 @@ agentId | int | Unique identifier for the source agent | M | M | M | M
 Property | Type | Description | C | R | U | D
 --- | --- | --- | --- | --- | --- | ---
 agentId | int | Unique identifier for the target agent | M | M | M | M
+
+### Download Resource
+The download of a single file from another agent. Has several different states such as: start, finish.
+
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+TBD | TBD | TBD | M | M | M | M
+
+### Upload Resource
+The upload of a single file to another agent. Has several different states such as: start, finish.
+
+Property | Type | Description | C | R | U | D
+--- | --- | --- | --- | --- | --- | ---
+TBD | TBD | TBD | M | M | M | M
 
 
 
