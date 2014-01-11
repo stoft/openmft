@@ -8,6 +8,7 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 		isInitialized: ko.observable(false),
 		transfers: ko.observableArray([]),
 		agents: ko.observableArray([]),
+		events: ko.observableArray([]),
 
 		setLoading: function(isInitialized) {
 			this.isInitialized(isInitialized);
@@ -15,34 +16,36 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 		sort: function(a) {
 			a.sort(function(left, right) { return left().name.localeCompare(right().name); });
 		},
+		sortEvents: function(a) {
+			a.sort(function(left, right) { return left().time.localeCompare(right().time); });
+		},
 		addAgent: function(agent) {
 			this.agents.push(ko.observable(agent));
 			this.sort(this.agents);
+		},
+		addEvent: function(event) {
+			this.events.push(ko.observable(event));
+			this.sortEvents(this.events);
 		},
 		addTransfer: function(transfer) {
 			this.transfers.push(ko.observable(transfer));
 			this.sort(this.transfers);
 		},
 		updateAgent: function(agent) {
-			// Get local agent
-			// var clientAgent;
 			for (var i = 0; i < this.agents().length; i++) {
 				if (this.agents()[i]().id === agent.id) {
 					this.agents()[i](agent);
 				}
 			}
-			// Update local agent with server data
-			// for (var key in serverAgent) {
-			// 	if (serverAgent.hasOwnProperty(key)) {
-			// 		clientAgent[key] = serverAgent[key];
-			// 	}
-			// }
-			// ToDo: push some notification to knockout (clientAgent is not an observable)
+		},
+		updateEvent: function(event) {
+			for (var i = 0; i < this.events().length; i++) {
+				if (this.events()[i]().id === event.id) {
+					this.events()[i](event);
+				}
+			}
 		},
 		updateTransfer: function(transfer) {
-			// this.transfers.remove(function(a) { return a.id == transfer.id; });
-			// this.transfers.push(transfer);
-			// this.sort(this.transfers);
 			for (var i = 0; i < this.transfers().length; i++) {
 				if (this.transfers()[i]().id === transfer.id) {
 					this.transfers()[i](transfer);
@@ -60,6 +63,21 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 					}
 					else {
 						console.log("Remove agent succeeded: " + JSON.stringify(result));
+					}
+				});
+			}
+		},
+		removeEvent: function(event, fromServer) {
+			if (fromServer) {
+				this.events.remove(function(a) { return a().id == event; });
+			}
+			else {
+				socket.emit("delete", "event", event.id, function(err, result) {
+					if (err) {
+						console.log("Failed to remove event: " + err);
+					}
+					else {
+						console.log("Remove event succeeded: " + JSON.stringify(result));
 					}
 				});
 			}
@@ -150,6 +168,21 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 					callback(err);
 				}
 			});
+		},
+		// Get events
+		function(callback) {
+			socket.emit("list", "event", function(err, result) {
+				if (! err) {
+					console.log("Got events list (" + result.length + ")");
+					for (var i = 0; i < result.length; i++) {
+						state.addEvent(result[i]);
+					}
+					callback(null);
+				}
+				else {
+					callback(err);
+				}
+			});
 		}
 	], function(err) {
 		if (! err) {
@@ -174,6 +207,9 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 		else if (e.resourceType === "agent") {
 			state.addAgent(e.agent);
 		}
+		else if (e.resourceType === "event") {
+			state.addEvent(e.event);
+		}
 	});
 	socket.on("update", function(e) {
 		console.log("socket: updated: " + e);
@@ -184,6 +220,9 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 		else if (e.resourceType === "agent") {
 			state.updateAgent(e.agent);
 		}
+		else if (e.resourceType === "event") {
+			state.updateEvent(e.event);
+		}
 	});
 	socket.on("delete", function(e) {
 		console.log("socket: deleted: " + e);
@@ -193,6 +232,9 @@ define(["knockout", "async", "underscore"], function(ko, async, _) {
 		}
 		else if (e.resourceType === "agent") {
 			state.removeAgent(e.agent, true);
+		}
+		else if (e.resourceType === "event") {
+			state.removeEvent(e.event, true);
 		}
 	});
 	
