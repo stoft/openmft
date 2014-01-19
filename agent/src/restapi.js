@@ -14,6 +14,7 @@
 		FILES: '/rest/' + version + '/files',
 		NOTIFICATIONS : '/rest/' + version + '/notifications',
 		TRANSFERS: '/rest/' + version + '/transfers',
-		AGENTS: '/rest/' + version + '/agents'
+		AGENTS: '/rest/' + version + '/agents',
+		EVENTS: '/rest/' + version + '/events'
 	};
 }());

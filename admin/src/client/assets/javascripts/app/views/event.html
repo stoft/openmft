@@ -1,0 +1,23 @@
+<section>
+    <h2 data-bind="html: displayName"></h2>
+    	<table class="table">
+    		<thead>
+    			<tr>
+                    <th>Time</th>
+                    <th>Type</th>
+                    <th>Agent</th>
+                    <th>Transfer</th>
+                    <th>File</th>
+    			</tr>
+    		</thead>
+	        <tbody data-bind="foreach: state.events">
+	        	<tr>
+                    <td data-bind="text: time"></td>
+                    <td data-bind="text: type"></td>
+                    <td data-bind="text: agent"></td>
+                    <td data-bind="text: transfer"></td>
+                    <td data-bind="text: file"></td>
+	        	</tr>
+	        </tbody>
+    	</table>
+</section>

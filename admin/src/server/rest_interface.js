@@ -69,16 +69,22 @@
 	//-----------------------------------
 	// Initialize and start agent process
 	//-----------------------------------
-	var create = function(config, state) {
+	var create = function(config, adminState, agentState) {
 		// Initialize server
 		var server = restify.createServer();
 		server.use(restify.queryParser());
 		server.use(restify.bodyParser({ mapParams: false }));
 
+		var resourceSets = {
+			agent: adminState.agent,
+			transfer: adminState.transfer,
+			event: agentState.event
+		};
+
 		// List all resources
 		server.get("/rest/v1/:type", function(req, res, next) {
 			console.log("GET " + req.path());
-			state[singular(req.params.type)].findResources(null, function(err, result) {
+			resourceSets[singular(req.params.type)].findResources(null, function(err, result) {
 				sendRestResponse(req, res, next, err, result, req.params.type);
 			});
 		});
@@ -86,7 +92,7 @@
 		// Create resource
 		server.post("/rest/v1/:type", function(req, res, next) {
 			console.log("POST " + req.path());
-			state[singular(req.params.type)].addResource(req.body, function(err, result) {
+			resourceSets[singular(req.params.type)].addResource(req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, singular(req.params.type));
 			});
 		});
@@ -94,7 +100,7 @@
 		// Get resource details
 		server.get("/rest/v1/:type/:id", function(req, res, next) {
 			console.log("GET " + req.path());
-			state[singular(req.params.type)].getResource(req.params.id, function(err, result) {
+			resourceSets[singular(req.params.type)].getResource(req.params.id, function(err, result) {
 				sendRestResponse(req, res, next, err, result, singular(req.params.type));
 			});
 		});
@@ -102,7 +108,7 @@
 		// Update resource
 		server.put("/rest/v1/:type/:id", function(req, res, next) {
 			console.log("PUT " + req.path());
-			state[singular(req.params.type)].updateResource(req.params.id, req.body, function(err, result) {
+			resourceSets[singular(req.params.type)].updateResource(req.params.id, req.body, function(err, result) {
 				sendRestResponse(req, res, next, err, result, singular(req.params.type));
 			});
 		});
@@ -110,7 +116,7 @@
 		// Delete resource
 		server.del("/rest/v1/:type/:id", function(req, res, next) {
 			console.log("DELETE " + req.path());
-			state[singular(req.params.type)].deleteResource(req.params.id, function(err) {
+			resourceSets[singular(req.params.type)].deleteResource(req.params.id, function(err) {
 				sendRestResponse(req, res, next, err, "ok");
 			});
 		});
@@ -138,7 +144,7 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(config, agents) {
-        return create(config, agents);
+    module.exports.create = function(config, adminState, agentState) {
+        return create(config, adminState, agentState);
     };
 }());

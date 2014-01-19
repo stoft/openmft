@@ -30,6 +30,13 @@
       "state",
       "bootstrap"
     ],
+    "/javascripts/app/viewmodels/event.js": [
+      "plugins/http",
+      "durandal/app",
+      "knockout",
+      "state",
+      "bootstrap"
+    ],
     "/javascripts/app/viewmodels/shell.js": [
       "plugins/router",
       "durandal/app"
