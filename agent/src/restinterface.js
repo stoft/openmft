@@ -35,7 +35,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function(config, agentState, adminState) {
+	var create = function(config, agentState, adminState, fileInterface) {
 		//------------------------------
 		// Initialize the REST interface
 		//------------------------------
@@ -97,14 +97,36 @@
 		// Get file
 		server.get('/rest/v1/files/:id', function(req, res, next){
 			console.log('GET ' + req.path());
-			agentState.file.getResource(req.params.id, function(err, file) {
-				if (! err) {
-					fs.createReadStream(file.path).pipe(res);
-				}
-				else {
-					next(err);
-				}
-			});
+			if (req.query.agentId) {
+				//TODO this id may have to be replaced with something more unique
+				// e.g. if an upload is aborted or performed several times to the
+				// same agent.
+				var uploadId = req.params.id + '-' + req.query.agentId;
+				agentState.file.getResource(req.params.id, function(err, file) {
+					if (! err) {
+						agentState.upload.addResource({ id : uploadId }, function addUpload() {
+						 	agentState.upload.getResource(uploadId, function(err, result) {
+						 		if(!err) {
+						 			//TODO replace with file interface
+									fileInterface.getFileReadStream(file.path).pipe(res);
+									res.on('finish', function onFinish() {
+										agentState.upload.updateResource( uploadId, result);
+									});
+						 		} else {
+						 			console.log('Could not find upload resource.');
+						 			//TODO error handling
+						 		}
+						 	});
+						});
+					}
+					else {
+						next(err);
+					}
+				});
+			} else {
+				console.log('File request missing agentId!');
+				//TODO error handling
+			}
 		});
 
 		//------------------------
@@ -207,7 +229,7 @@
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(config, agentState, adminState) {
-        return create(config, agentState, adminState);
+    module.exports.create = function(config, agentState, adminState, fileInterface) {
+        return create(config, agentState, adminState, fileInterface);
     };
 }());

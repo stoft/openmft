@@ -36,7 +36,7 @@
 	//------------
 	// Constructor
 	//------------	
-	var create = function(config, agentState, adminState) {
+	var create = function(config, agentState, adminState, fileInterface) {
 
 		//-----------------------
 		// Hidden state variables
@@ -107,6 +107,14 @@
 			processNotification(resource.notification);
 		});
 
+		agentState.upload.on('add', function onAdd(resource) {
+			console.log('Upload started: ' + resource.upload.id);
+		});
+
+		agentState.upload.on('update', function onUpdate(resource) {
+			console.log('Upload updated: ' + resource.upload.id);
+		});
+
 		//------------
 		//Internals
 		//------------
@@ -169,6 +177,15 @@
 		}
 		function transferDeleted(transfer) {
 			console.log('transferDeleted: ' + transfer.id);
+			//TODO search through transfer targets and see if we are a target
+			// if so, unsubscribe for each source agent of the transfer.
+			if (_.some(transfer.targets, function us(target) {
+				return target.agentId === config.id;
+			})) {
+					for (var i = 0; i < transfer.sources.length; i++ ) {
+						unsubscribe(transfer.sources[i].agentId);
+					}
+			}
 		}
 
 		//------------
@@ -183,33 +200,32 @@
 
 		function subscribe(agentId, host, port) {
 			console.log('client.subscribe ' + agentId + ' ' + host + ' ' + port);
-			var intervalId = setInterval(getNotifications, 60000, host, port, config);
-			subscriptions[agentId] = intervalId;
+			if (agentId in subscriptions) {
+				var intervalId = setInterval(getNotifications, 60000, host, port, config);
+				subscriptions[agentId] = intervalId;
+			}
 		}
 
 		function unsubscribe(agentId) {
-			var intervalId = subscriptions[agentId];
-			clearInterval(intervalId);
-			delete subscriptions[agentId];
+			// TODO this function presupposes that the current transfer 
+			// being removed no longer exists in adminState.
+			adminState.transfer.findResources(function checkForOthersWithSameSourceAgent(transfer) {
+				return (_.filter(transfer.sources, function(source) { source.agentId === agentId; } )).length > 0;
+			}, function clearIntervalIfNotExists(err, transfers) {
+				if (!err && transfers.length === 0 ) {
+					var intervalId = subscriptions[agentId];
+					clearInterval(intervalId);
+					delete subscriptions[agentId];
+				}
+			});
 		}
 
 		function getFile(host, port, notification, transfer, callback) {
 			// console.log(JSON.stringify(notification));
 			var index = notification.filename.lastIndexOf('/');
 			var filename = notification.filename.substring(index + 1);
-			var tmpFolder = (configuration.runtimeDir.charAt(
-				configuration.runtimeDir.length - 1) === '/') ?
-					configuration.runtimeDir :
-					configuration.runtimeDir + '/';
-			var finalFolder = (configuration.outboundDir.charAt(
-				configuration.outboundDir.length - 1) === '/') ?
-					configuration.outboundDir :
-					configuration.outboundDir + '/';
-			finalFolder += transfer.name + '/';
-			var file = fs.createWriteStream(tmpFolder + filename);
-			console.log('Created file stream: ' + tmpFolder + filename);
 			var client = restify.createClient({ url : 'http://' + host + ':' + port });
-			client.get(restApi.FILES + '/' + notification.fileId, function(err, req) {
+			client.get(restApi.FILES + '/' + notification.fileId + '?agentId=' + config.id, function(err, req) {
 				if(err) {
 					console.log('Error performing request: ' + JSON.stringify(err));
 					throw err;
@@ -221,16 +237,12 @@
 						throw err;
 					}
 					else {
-						res.pipe(file);
-						file
-							.on('finish', function() {
-								file.close(); callback(host, port, notification);
-							})
-							.on('finish', function() {
-								moveFile(tmpFolder + filename, finalFolder + filename);
-							})
+						var writableStream = fileInterface.pushToFile(res, filename, transfer);
+						// res.pipe(file);
+						writableStream
 							.on('finish', function() {
 								agentState.notification.deleteResource(notification.id);
+								callback(host, port, notification);
 							});
 					}
 				});
@@ -333,8 +345,8 @@
 	//---------------
 	// Module exports
 	//---------------
-	module.exports.create = function(config, agentState, adminState) {
+	module.exports.create = function(config, agentState, adminState, fileInterface) {
 		//TODO subscribe to each source.
-		return create(config, agentState, adminState);
+		return create(config, agentState, adminState, fileInterface);
 	};
 }());

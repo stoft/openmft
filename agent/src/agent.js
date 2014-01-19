@@ -86,6 +86,13 @@ var agentState = resourceModule.create({
 					updatesVersion: true
 				}
 			]
+		},
+		{
+			resourceType: "upload"
+		},
+		{
+			resourceType: "download"
+			//TODO should probably contain both transfer.id and file.id
 		}
 	]
 });
