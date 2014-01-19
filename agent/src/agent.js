@@ -93,6 +93,41 @@ var agentState = resourceModule.create({
 		{
 			resourceType: "download"
 			//TODO should probably contain both transfer.id and file.id
+		},
+		{
+			resourceType: 'event',
+			properties: [
+				{
+					name: 'time',
+					type: 'string',
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: 'type',
+					type: 'string',
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: 'agent',
+					type: 'number',
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: 'transfer',
+					type: 'string',
+					required: true,
+					updatesVersion: true
+				},
+				{
+					name: 'file',
+					type: 'string',
+					required: true,
+					updatesVersion: true
+				}
+			]
 		}
 	]
 });

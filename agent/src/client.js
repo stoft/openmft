@@ -72,6 +72,14 @@
 		agentState.file.on('add', function onAdd(resource) {
 			var file = resource.file;
 			console.log('File '+file.id+' added, lets create notifications');
+			// Log an event that we received a file
+			agentState.event.addResource({
+				time: new Date(),
+				type: 'FileReceived',
+				agent: config.id,
+				transfer: file.transferId,
+				file: file.id
+			});
 			adminState.transfer.getResource(file.transferId, function getTransfer(err, transfer) {
 				if (err) {
 					throw new Error('Couldnt get transfer ' + file.transferId);
@@ -105,6 +113,10 @@
 		agentState.notification.on('add', function onAdd(resource) {
 			console.log('Notification added: ' + resource.notification.id);
 			processNotification(resource.notification);
+		});
+		agentState.event.on('add', function onAdd(resource) {
+			console.log('Event added: ' + resource.event.id);
+			pushEventToAdmin(resource.event);
 		});
 
 		agentState.upload.on('add', function onAdd(resource) {
@@ -243,6 +255,14 @@
 							.on('finish', function() {
 								agentState.notification.deleteResource(notification.id);
 								callback(host, port, notification);
+								// Log an event that we successfully transferred a file
+								agentState.event.addResource({
+									time: new Date(),
+									type: 'FileTransferred',
+									agent: config.id,
+									transfer: transfer.id,
+									file: notification.fileId
+								});
 							});
 					}
 				});
@@ -326,6 +346,18 @@
 			});
 		}
 
+		// Lets push the event to admin
+		function pushEventToAdmin(event) {
+			var client = createJsonClient(config.adminHost, config.adminPort);
+			client.post(restApi.EVENTS, event, function(err, req, res) {
+				if(err) {
+					console.log('Failed to push event: ' + JSON.stringify(err));
+				}
+				else {
+					console.log('Pushed event. id: %s, status: %d', event.id, res.statusCode);
+				}
+			});
+		}
 
 		//-----------------------
 		// Return the newly created instance
