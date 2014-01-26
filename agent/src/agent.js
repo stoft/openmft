@@ -88,6 +88,13 @@ var agentState = resourceModule.create({
 			]
 		},
 		{
+			resourceType: "upload"
+		},
+		{
+			resourceType: "download"
+			//TODO should probably contain both transfer.id and file.id
+		},
+		{
 			resourceType: 'event',
 			properties: [
 				{
@@ -127,8 +134,8 @@ var agentState = resourceModule.create({
 console.log('Resources loaded, starting agent...');
 // Initialize server
 var adminProtocol = adminProtocolModule.create(config, agentState, adminState);
-restinterface.create(config, agentState, adminState);
 var fi = fileinterface.create(config, agentState, adminState);
+var ri = restinterface.create(config, agentState, adminState, fi);
 adminProtocol.handleAgentStarted();
-client.create(config, agentState, adminState);
+client.create(config, agentState, adminState, fi, ri);
 fi.start();
