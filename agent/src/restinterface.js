@@ -9,7 +9,9 @@
 	// Dependencies
 	//-------------
 	var restify = require('restify');
-	var fs = require('fs');
+	var restApi = require('./restapi.js');
+	var uuid = require('node-uuid');
+	// var fs = require('fs');
 
 	//-----------------------------------
 	// Internal functions
@@ -46,13 +48,21 @@
 		//------------------------
 		// File Transfer Interface
 		//------------------------
+
 		// Get notifications
 		server.get('/rest/v1/notifications', function(req, res, next){
 			console.log('GET ' + req.path());
-			if(req.query.target){
+			if(req.query.target) {
 				agentState.notification.findResources(function matchTarget(notification) {
 					return req.query.target == notification.target;
 				}, function(err, result) {
+					sendRestResponse(req, res, next, err, result, 'notifications');
+				});
+			}
+			// TODO debug interface, should be removed or switchable using
+			// debug flag in configuration file.
+			else if( req.query.debug) {
+				agentState.notification.findResources( null , function(err, result) {
 					sendRestResponse(req, res, next, err, result, 'notifications');
 				});
 			}
@@ -98,25 +108,22 @@
 		server.get('/rest/v1/files/:id', function(req, res, next){
 			console.log('GET ' + req.path());
 			if (req.query.agentId) {
-				//TODO this id may have to be replaced with something more unique
-				// e.g. if an upload is aborted or performed several times to the
-				// same agent.
-				var uploadId = req.params.id + '-' + req.query.agentId;
+				var uploadId = uuid.v4();
 				agentState.file.getResource(req.params.id, function(err, file) {
 					if (! err) {
 						agentState.upload.addResource({ id : uploadId }, function addUpload() {
-						 	agentState.upload.getResource(uploadId, function(err, result) {
-						 		if(!err) {
-						 			//TODO replace with file interface
+							agentState.upload.getResource(uploadId, function(err, result) {
+								if(!err) {
+									// console.log('Uploading file: ', JSON.stringify(file));
 									fileInterface.getFileReadStream(file.path).pipe(res);
 									res.on('finish', function onFinish() {
 										agentState.upload.updateResource( uploadId, result);
 									});
-						 		} else {
-						 			console.log('Could not find upload resource.');
-						 			//TODO error handling
-						 		}
-						 	});
+								} else {
+									console.log('Could not find upload resource.');
+									//TODO error handling
+								}
+							});
 						});
 					}
 					else {
@@ -128,6 +135,43 @@
 				//TODO error handling
 			}
 		});
+
+		// Download file from remote agent.
+		function downloadFile(host, port, notification, transfer, callback) {
+			var index = notification.filename.lastIndexOf('/');
+			var filename = notification.filename.substring(index + 1);
+			var client = restify.createClient({ url : 'http://' + host + ':' + port });
+			client.get(restApi.FILES + '/' + notification.fileId + '?agentId=' + config.id, function(err, req) {
+				if(err) {
+					console.log('Downloading file. Error performing request: ' + JSON.stringify(err));
+					throw err;
+				}
+
+				req.on('result', function(err, res) {
+					if(err) {
+						console.log('Downloading file. Error reading response: ' + JSON.stringify(err));
+						throw err;
+					}
+					else {
+						var writableStream = fileInterface.pushToFile(res, filename, transfer);
+						// res.pipe(file);
+						writableStream
+						.on('finish', function() {
+							agentState.notification.deleteResource(notification.id);
+							callback(host, port, notification);
+								// Log an event that we successfully transferred a file
+								agentState.event.addResource({
+									time: new Date(),
+									type: 'FileTransferred',
+									agent: config.id,
+									transfer: transfer.id,
+									file: notification.fileId
+								});
+							});
+					}
+				});
+			});
+		}
 
 		//------------------------
 		// Administrator Interface
@@ -217,19 +261,21 @@
 		// Start the REST interface
 		//-------------------------
 		server.listen(config.port, function() {
-		  console.log('Agent listening at %s', server.url);
+			console.log('Agent listening at %s', server.url);
 		});
 
 		//------------------------------------
 		// Return the newly created 'instance'
 		//------------------------------------
-		return {};
+		return {
+			downloadFile: downloadFile
+		};
 	};
 
 	//---------------
 	// Module exports
 	//---------------
-    module.exports.create = function(config, agentState, adminState, fileInterface) {
-        return create(config, agentState, adminState, fileInterface);
-    };
+	module.exports.create = function(config, agentState, adminState, fileInterface) {
+		return create(config, agentState, adminState, fileInterface);
+	};
 }());

@@ -15,7 +15,8 @@
     "async": "0.2.x",
     "underscore": "1.5.x",
     "chokidar": "0.8.x",
-    "resource_module": "0.1.x"
+    "resource_module": "0.1.x",
+    "node-uuid": "1.4.x"
   },
   "devDependencies": {
   },

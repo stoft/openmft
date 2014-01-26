@@ -10,6 +10,7 @@
 	var chokidar = require('chokidar');
 	var _ = require('underscore');
 	var fs = require('fs');
+	var path = require('path');
 
 	//------------
 	// Constructor
@@ -58,19 +59,41 @@
 			});
 		}
 
-		function getFileReadStream(file) {
-			return fs.createReadStream(file.path).pipe(res);
+		function getFileReadStream(filePath) {
+			console.log('Getting file read stream: ', filePath);
+			var rs;
+			try {
+				rs = fs.createReadStream(filePath);
+			} catch (err) {
+				console.log('Getting file read stream. Encountered error: ', JSON.stringify(err) );
+				throw err;
+			}
+			// rs.on('error', function(err) {
+			// });
+			return rs;
+		}
+
+		function moveFile(oldPath, newPath){
+			console.log('Moving file %s to %s.', oldPath, newPath );
+			if ( !fs.existsSync(path.dirname(newPath)) ) {
+				fs.mkdirSync(path.dirname(newPath));
+			}
+			fs.rename(oldPath, newPath, function(err){
+				if (err) {
+					console.log('Error moving file %s to %s.', oldPath, newPath );
+				}
+			});
 		}
 
 		function pushToFile(readableStream, filename, transfer) {
-			var tmpFolder = (configuration.runtimeDir.charAt(
-				configuration.runtimeDir.length - 1) === '/') ?
-					configuration.runtimeDir :
-					configuration.runtimeDir + '/';
-			var finalFolder = (configuration.outboundDir.charAt(
-				configuration.outboundDir.length - 1) === '/') ?
-					configuration.outboundDir :
-					configuration.outboundDir + '/';
+			var tmpFolder = (config.runtimeDir.charAt(
+				config.runtimeDir.length - 1) === '/') ?
+					config.runtimeDir :
+					config.runtimeDir + '/';
+			var finalFolder = (config.outboundDir.charAt(
+				config.outboundDir.length - 1) === '/') ?
+					config.outboundDir :
+					config.outboundDir + '/';
 			finalFolder += transfer.name + '/';
 			var file = fs.createWriteStream(tmpFolder + filename);
 			console.log('Created file readableStream: ' + tmpFolder + filename);
@@ -101,7 +124,7 @@
 				if ( !fs.existsSync(dir)) {
 					fs.mkdirSync(dir);
 				}
-				console.log("Monitoring: " + dir);
+				console.log('Monitoring: ' + dir);
 				var watcher = chokidar.watch(dir, {ignored: /[\/\\]\./, interval: 5});
 				watcher.on('add', function(path, event){
 					console.log('Found new file: %s', path);
@@ -114,7 +137,7 @@
 			console.log('transferCreated: ' + transfer.id + ' we are ' + config.id);
 			loadTransfer(transfer);
 		}
-		function transferUpdated(transfer, old) {
+		function transferUpdated(transfer) {
 			console.log('transferUpdated: ' + transfer.id);
 		}
 		function transferDeleted(transfer) {
